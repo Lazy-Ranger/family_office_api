@@ -28,7 +28,6 @@ class UsersAccountService {
     }
     const hashedPassword = await hash(userRegistrationData.password, BCRYPT_CONFIG.ROUNDS);
     userRegistrationData.password = hashedPassword; 
-    delete userRegistrationData.password;
     const createUser = await this.users.create(userRegistrationData);
 
     return createUser;
