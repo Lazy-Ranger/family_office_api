@@ -22,6 +22,6 @@
     "e2e/**/*.ts",
     "jest.config.js",
     "ecosystem.config.js",
-    "config/**/*.ts",
+    "src/config/**/*.ts",
   ]
 }

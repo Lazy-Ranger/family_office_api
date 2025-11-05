@@ -5,7 +5,7 @@ import {
   ConflictException,
 } from "../../../utils/http";
 import { hash } from "bcrypt";
-import { BCRYPT_CONFIG } from "../../../../config";
+import { BCRYPT_CONFIG } from "../../../config";
 
 export interface IUsersAccountService {
   createUser: (req: Record<string, string>) => Promise<users>;

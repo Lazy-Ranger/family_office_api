@@ -1,4 +1,4 @@
-import { JWT_CONFIG } from "../../../config";
+import { JWT_CONFIG } from "../../config";
 import jwt, { Secret } from "jsonwebtoken";
   type ExpireTime = number | "1d";
 

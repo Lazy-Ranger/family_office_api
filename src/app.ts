@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import ErrorHandlerMiddleware from './shared/middlewares/errorHandlerMiddleware';
-import { CORS_WHITELIST, RATE_LIMIT } from '../config';
+import { CORS_WHITELIST, RATE_LIMIT } from './config';
 import {API_ROUTER} from './router';
 
 const app: express.Application = express();

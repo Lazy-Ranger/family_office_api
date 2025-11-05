@@ -1,7 +1,7 @@
 import './utils/loadEnvFile';
 import app from './app';
-import { sequelize } from '../config/database.config';
-import { PORT } from '../config';
+import { sequelize } from './database';
+import { PORT } from './config';
 import { valueToBoolean } from '../src/utils/common';
 
 const port =

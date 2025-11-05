@@ -1,4 +1,4 @@
-import { valueToBoolean } from '../src/utils/common';
+import { valueToBoolean } from '../utils/common';
 
 export const PORT = valueToBoolean(process.env.PORT) ? process.env.PORT : 3000;
 

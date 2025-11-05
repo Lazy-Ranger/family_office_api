@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Sequelize } from 'sequelize-typescript';
 import { Dialect } from 'sequelize';
-import * as db from '../src/models';
-import { PRODUCTION } from './constants'
-import { valueToBoolean } from '../src/utils/common';
+import * as db from '../models';
+import { PRODUCTION } from '../config'
+import { valueToBoolean } from '../utils/common';
 // import { ISequelizeOptions } from './interfaceConfig';
 
 export interface ISequelizeOptions {
