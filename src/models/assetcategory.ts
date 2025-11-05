@@ -16,7 +16,7 @@ interface SubCategory {
   kpis: { [key: string]: number };
 }
 
-@Table({ freezeTableName: true, underscored: true, timestamps: true })
+@Table({tableName: 'asset_categories', freezeTableName: true, underscored: true, timestamps: true })
 export default class AssetCategory extends Model {
   @Column({
     primaryKey: true,

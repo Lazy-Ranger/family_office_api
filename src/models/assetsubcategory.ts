@@ -5,67 +5,11 @@ import {
   Model,
   DataType,
   BelongsTo,
-  HasMany,
+  ForeignKey,
 } from 'sequelize-typescript';
 import AssetCategory from './assetcategory';
 
-export interface Asset {
-  id: number;
-  assetType: string;
-  currentValue: number;
-  assetTitle: string;
-
-  // Real Estate Properties
-  purchaseDate?: Date;
-  purchasePrice?: number;
-  owner?: string;
-  location?: string;
-  acquiredDate?: Date;
-  document?: string;
-  propertyCategory?: string;
-  numberOfOwner?: number;
-  propertyTax?: number;
-  houseManager?: string;
-  managerSalary?: number;
-  houseInsurancePremium?: number;
-  rentPremiumFrequency?: string;
-  NextPremiumDate?: Date;
-  dueDate?: Date;
-  monthlyMaintenance?: number;
-  tenantName?: string;
-  monthlyRent?: number;
-  securityDeposit?: number;
-  rentFrequency?: string;
-  rentCollectedStatus?: string;
-  leaseStart?: Date;
-  leaseEnd?: Date;
-  leaseRenewDate?: Date;
-  loanAmountOutstanding?: number;
-  emiAmount?: number;
-  emiFrequency?: string;
-  nextEmiDate?: Date;
-
-  // Vehicle Properties
-  brand?: string;
-  referenceNumber?: string;
-  registrationNumber?: string;
-  acquisitionMode?: string;
-  insuredValue?: number;
-  insurerName?: string;
-  premiumAmount?: number;
-  premiumFrequency?: string;
-  policyRenewalDate?: Date;
-  additionalNotes?: string;
-
-  // System fields
-  created_by: number;
-  updated_by: number;
-  created_at: Date;
-  updated_at: Date;
-}
-
-
-@Table({ freezeTableName: true, underscored: true, timestamps: true })
+@Table({ tableName: 'asset_subcategories', freezeTableName: true, underscored: true, timestamps: true })
 export default class AssetSubCategory extends Model {
   @Column({
     primaryKey: true,
@@ -106,12 +50,7 @@ export default class AssetSubCategory extends Model {
   })
   aggregatedKPIs!: { [key: string]: number };
 
-  @Column({
-    allowNull: true,
-    type: DataType.JSONB
-  })
-  asset!: Asset[]
-
+  @ForeignKey(() => AssetCategory)
   @Column({
     allowNull: false,
     type: DataType.UUID,
@@ -136,5 +75,5 @@ export default class AssetSubCategory extends Model {
     defaultValue: literal('CURRENT_TIMESTAMP')
   })
   updatedAt!: Date;
-  
 }
+

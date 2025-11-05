@@ -4,33 +4,31 @@ import {
   Model, 
   DataType, 
   BelongsTo, 
-  HasMany 
+  HasMany, 
+  ForeignKey
 } from 'sequelize-typescript';
 import { literal } from 'sequelize';
 import users from './user';  
 import assets from './asset';
+import AssetCategory from './assetcategory';
+import AssetSubCategory from './assetsubcategory';
 @Table({ freezeTableName: true, underscored: true, timestamps: false })
 export default class document extends Model {
   
-  // Primary Key
-  @Column({ primaryKey: true, autoIncrement: true })
+
+  @Column({type: DataType.NUMBER, primaryKey: true, autoIncrement: true })
   id!: number;
 
-  // Document Name
-  @Column({ allowNull: false })
+
+  @Column({ type: DataType.STRING,allowNull: false })
   name!: string;
 
-  // Type (PDF, Word, etc.)
-  @Column({ allowNull: false })
+  @Column({ type: DataType.STRING,allowNull: false })
   type!: string;
 
-  // Entity related (like organization, client, etc.)
-  @Column({ allowNull: false })
-  entity!: string;
-
-  // Uploaded By
   @Column({
     allowNull: false,
+    type: DataType.NUMBER,
     references: {
       model: 'users',
       key: 'id',
@@ -44,35 +42,56 @@ export default class document extends Model {
   })
   uploadedBy!: users;
 
-  // Upload Date
+
   @Column({ type: DataType.DATE, allowNull: false })
   upload_date!: Date;
 
-  // Tags
+
   @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: true })
   tags!: string[];
 
-  // Status
   @Column({ allowNull: false })
-  status!: string; // You can map this to an ENUM if DocumentStatus is defined
+  status!: string;
 
-  // Category
-  @Column({ allowNull: false })
-  category!: string;
 
-  // Subcategory
-  @Column({ allowNull: true })
-  subcategory!: string;
+@ForeignKey(() => AssetCategory)
+  @Column({
+    allowNull: false,
+    type: DataType.UUID,
+    references: {
+      model: ' AssetCategory',
+      key: 'id',
+    },
+  })
+  assetCategoryId!: string;
 
-  // Asset Entity (linked to Asset model if applicable)
+  @BelongsTo(() => AssetCategory)
+  assetCategory!: AssetCategory;
+
+  @ForeignKey(() => AssetSubCategory)
+  @Column({
+    allowNull: false,
+    type: DataType.UUID,
+    references: {
+      model: 'AssetSubCategory',
+      key: 'id',
+    },
+  })
+  assetSubcategoryId!: string;
+
+  @BelongsTo(() => AssetSubCategory)
+  assetSubCategory!: AssetSubCategory; 
+
+
   @Column({
     allowNull: true,
+    type: DataType.STRING,
     references: {
       model: 'assets',
       key: 'id',
     },
   })
-  asset_entity!: number | null;
+  asset_entity!: "string "| null;
 
   @BelongsTo(() => assets, {
     targetKey: 'id',
@@ -80,9 +99,10 @@ export default class document extends Model {
   })
   assetEntity!: assets | null;
 
-  // Parent Document (for versioning or grouping)
+
   @Column({
     allowNull: true,
+    type: DataType.STRING,
     references: {
       model: 'document',
       key: 'id',
@@ -102,25 +122,22 @@ export default class document extends Model {
   })
   childDocuments!: document[];
 
-  // Relation type — parent or child
   @Column({
     type: DataType.ENUM('parent', 'child'),
     allowNull: false,
   })
   document_relation!: 'parent' | 'child';
 
-  // Recurring Frequency (monthly, yearly, etc.)
   @Column({ allowNull: true })
   recurring_frequency!: string;
 
-  // Created At
   @Column({
     type: DataType.DATE,
     defaultValue: literal('CURRENT_TIMESTAMP'),
   })
   created_at!: Date;
 
-  // Updated At
+
   @Column({
     type: DataType.DATE,
     defaultValue: literal('CURRENT_TIMESTAMP'),
