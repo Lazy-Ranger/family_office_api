@@ -4,9 +4,9 @@ import cors, { CorsOptions } from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
-import ErrorHandlerMiddleware from './middlewares/errors/errorHandlerMiddleware';
+import ErrorHandlerMiddleware from './shared/middlewares/errorHandlerMiddleware';
 import { CORS_WHITELIST, RATE_LIMIT } from '../config';
-import apiRouter from './routes/api.router';
+import {API_ROUTER} from './router';
 
 const app: express.Application = express();
 const errorHandler: ErrorHandlerMiddleware = new ErrorHandlerMiddleware();
@@ -45,7 +45,7 @@ app.use(
   })
 );
 
-app.use('/api', apiRouter);
+app.use('/api', API_ROUTER);
 app.use(errorHandler.handleErrors);
 app.use(function(req, res, next) {
   res.removeHeader('X-Powered-By');

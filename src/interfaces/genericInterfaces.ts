@@ -7,10 +7,12 @@ export interface IDbCount {
 }
 
 export interface IError {
-  code?: number;
+  statusCode ?: number;
   status?: number;
   message?: string;
   errorCode?: number;
+  description ?: string;
+  data?: string
 }
 
 export interface QueryParams<T> {

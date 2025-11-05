@@ -9,13 +9,13 @@ export default class ErrorHandlerMiddleware {
     res: Response,
     next: NextFunction
   ): void {
-    const status = valueToBoolean(err.code)
-      ? err.code
-      : valueToBoolean(err.status)
+    const status = valueToBoolean(err.statusCode )
+      ? err.statusCode 
+      : valueToBoolean(err.description)
       ? err.status
       : 500;
-    const message = valueToBoolean(err.message)
-      ? err.message
+    const message = valueToBoolean(err.data)
+      ? err.data
       : 'Internal Server Error';
 
     if (status === 500) {
@@ -27,9 +27,8 @@ export default class ErrorHandlerMiddleware {
       next();
     }
 
-    // req.user?.transaction?.rollback();
     res.status(Number(status));
-    res.json({ code: status, message, errorCode: err.errorCode });
+    res.json({ code: status, message});
   }
 
   static asyncTryCatchMiddleware(handler: Middleware): Middleware {
