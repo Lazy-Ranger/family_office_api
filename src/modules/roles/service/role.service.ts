@@ -1,15 +1,16 @@
 import { permissions, roles, role_has_permissions, users } from '../../../models'
-import { col, where } from 'sequelize';
+import { col, where, Op, Order, Sequelize, WhereOptions, fn, } from 'sequelize';
 import CacheService from '../../../shared/services/cache/cache.service';
 import { BadRequestException } from "../../../utils/http";
 import { valueToBoolean } from '../../../utils/common';
 import { ERRORS_LITERAL } from '../../../config'
-import { IRole } from '../interfaces'
+import { IRole, IGetBody } from '../interfaces'
 
 
 export interface IRoleService {
     createRole: (roleBody: IRole, userId: number) => Promise<void>;
     getPermissions: (id: number) => Promise<string[]>;
+    listRoles: (body: IGetBody) => Promise<{ data: roles[], count: number }>;
 }
 
 
@@ -51,7 +52,49 @@ class RoleService {
         );
     }
 
-    async getPermissions(id: number): Promise<string[]> {
+    listRoles = async (body: IGetBody): Promise<{ data: roles[], count: number }> => {
+        const {
+            filters,
+            page,
+            sortField,
+            sortOrder,
+            sizePerPage: limit,
+        } = body;
+        const offset = (page - 1) * limit;
+        const filter = JSON.parse(filters);
+        const whereList: WhereOptions = [];
+        let order: Order = [[sortField, sortOrder.toUpperCase()]];
+        if (sortField === 'role') {
+            order = [
+                [
+                    Sequelize.fn('lower', Sequelize.col(sortField)),
+                    sortOrder.toUpperCase(),
+                ],
+            ];
+        }
+
+        if (valueToBoolean(filter.role)) {
+            const searchTxt = filter.role.toLowerCase();
+            whereList.push(
+                where(fn('lower', col('roles.role')), Op.like, `%${searchTxt}%`)
+            );
+        }
+
+        const { rows, count } = await this.roles.findAndCountAll({
+            where: whereList,
+            order,
+            offset,
+            limit,
+            raw: true
+        });
+
+        return {
+            data: rows,
+            count,
+        }
+    }
+
+    getPermissions = async (id: number): Promise<string[]> => {
         const userRoleKey = `user-role-${id}`;
         let roleId = this.nodeCache.get(userRoleKey);
         if (!valueToBoolean(roleId)) {

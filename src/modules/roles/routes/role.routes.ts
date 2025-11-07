@@ -9,3 +9,5 @@ export const ROLES_ROUTER = Router();
 const { validate } = new ValidatorMiddleware();
 
 ROLES_ROUTER.post("/create", canAny([PERMISSIONS.CREATE_ROLE, PERMISSIONS.ALL]), validate(roleSchema), ROLE_CONTROLLER.create);
+
+ROLES_ROUTER.get('/list', canAny([PERMISSIONS.CREATE_ROLE, PERMISSIONS.ALL]), ROLE_CONTROLLER.list);

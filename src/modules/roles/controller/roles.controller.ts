@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { httpException, httpOK } from "../../../utils/http";
 import { HttpSessionRequest } from '../../../interfaces'
-import {IRole} from '../interfaces'
+import { IRole, IGetBody } from '../interfaces'
 import RoleServiceInstance, { IRoleService } from '../service/role.service'
 
 
@@ -19,6 +19,16 @@ class RolesController {
             httpOK(res, data);
         } catch (err) {
             httpException(res, err, `[Roles Controller:] cannot create role`);
+        }
+    }
+
+    list = async (req: Request, res: Response) => {
+        try {
+            const query = req.query as unknown as IGetBody
+            const data = await this.roleService.listRoles(query);
+            httpOK(res, data);
+        } catch (err) {
+            httpException(res, err, `[Roles Controller:] cannot list roles`);
         }
     }
 
