@@ -8,5 +8,3 @@ export const AUTH_ROUTER = Router();
 const { validate } = new ValidatorMiddleware();
 
 AUTH_ROUTER.post("/login", validate(loginSchema), AUTH_CONTROLLER.loginUser);
-
-AUTH_ROUTER.post("/register", authorizedToken, validate(createUserSchema), AUTH_CONTROLLER.registerUser);

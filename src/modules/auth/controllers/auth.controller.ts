@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { httpException, httpOK } from "../../../utils/http";
-// import { LoginUserDTO, RegisterUserDTO } from "../dtos";
+import { ILoginUser } from "../interfaces";
 import AuthServiceInstance, { IAuthService } from "../services/auth.service";
 
 class AuthController {
@@ -10,23 +10,8 @@ class AuthController {
     this.authService = AuthServiceInstance;
   }
 
-  registerUser = async (req: Request, res: Response) => {
-    const createAccountReq = req.body;
-
-    try {
-      const loggedInUser = await this.authService.createAccount(
-        createAccountReq
-      );
-
-      httpOK(res, loggedInUser);
-    } catch (err) {
-      httpException(res, err, `[AuthController:] cannot create user account`);
-    }
-  };
-
   loginUser = async (req: Request, res: Response) => {
-    const accountLoginReq = req.body;
-
+    const accountLoginReq:ILoginUser = req.body;
     try {
       const loggedInUser = await this.authService.login(accountLoginReq);
 

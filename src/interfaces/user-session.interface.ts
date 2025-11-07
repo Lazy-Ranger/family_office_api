@@ -2,7 +2,7 @@ import { User } from "./user.interface";
 import { Request } from "express";
 
 export interface UserSession {
-  _id: number;
+  id: number;
   email: string;
   profile: {
     name?: string;
@@ -10,10 +10,12 @@ export interface UserSession {
 }
 
 export interface LoggedInResponse {
-  user: User;
+  user: User,
   token: string;
+  permissions: string[]
 }
 
 export interface HttpSessionRequest extends Request {
   user: UserSession;
+  permissions: string[]
 }

@@ -5,3 +5,6 @@ export { default as entity } from './entity';
 export { default as document } from './document';
 export { default as users } from './user';
 export { default as cashflow } from './cashflow';
+export { default as permissions } from './permissions';
+export { default as role_has_permissions } from './role_has_permissions';
+export { default as roles } from './roles';

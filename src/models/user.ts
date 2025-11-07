@@ -1,11 +1,13 @@
-import { 
-  Table, 
-  Column, 
-  Model, 
-  DataType, 
-  HasMany 
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  HasMany,
+  AllowNull
 } from 'sequelize-typescript';
 import { literal } from 'sequelize';
+import { allow } from 'joi';
 
 @Table({ freezeTableName: true, underscored: true, timestamps: false })
 export default class users extends Model {
@@ -14,30 +16,30 @@ export default class users extends Model {
   id!: number;
 
 
-  @Column({ type: DataType.STRING,allowNull: false })
+  @Column({ type: DataType.STRING, allowNull: false })
   first_name!: string;
 
 
-  @Column({ type: DataType.STRING,allowNull: false })
+  @Column({ type: DataType.STRING, allowNull: false })
   last_name!: string;
 
 
-  @Column({ type: DataType.STRING,allowNull: false, unique: true })
+  @Column({ type: DataType.STRING, allowNull: false, unique: true })
   email!: string;
 
 
-  @Column({ type: DataType.STRING,allowNull: false })
+  @Column({ type: DataType.STRING, allowNull: false })
   password!: string;
 
 
-  @Column({ type: DataType.STRING,allowNull: false })
-  role!: string;
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  role_id!: number;
 
 
-  @Column({ type: DataType.STRING,allowNull: true })
+  @Column({ type: DataType.STRING, allowNull: true })
   phone_number!: string;
 
-  @Column({ type: DataType.STRING,allowNull: true })
+  @Column({ type: DataType.STRING, allowNull: true })
   department!: string;
 
 
