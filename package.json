@@ -10,7 +10,8 @@
     "build": "tsc -p . && npm run copy-files",
     "copy-files": "copyfiles -af ./src/services/templates/email/*.ejs ./src/**/*.ejs ./dist/src/templates/email/",
     "lint": "eslint \"**/*.{js,ts}\"",
-    "lint:fix": "eslint --fix \"**/*.{js,ts}\""
+    "lint:fix": "eslint --fix \"**/*.{js,ts}\"",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "",
@@ -32,14 +33,26 @@
     "pg": "^8.16.3",
     "sequelize-typescript": "^2.1.6"
   },
+  "lint-staged": {
+    "src/**/*.{js,html,css}": "prettier --write",
+    "src/**/*.ts": "eslint"
+  },
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "copyfiles": "^2.4.1",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "husky": "^8.0.3",
+    "jiti": "^2.6.1",
+    "lint-staged": "^16.2.6",
     "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4"
   }
 }
