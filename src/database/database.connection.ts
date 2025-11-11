@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Sequelize } from 'sequelize-typescript';
 import { Dialect } from 'sequelize';
 import * as db from '../models';

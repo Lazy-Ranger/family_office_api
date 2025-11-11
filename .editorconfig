@@ -1,0 +1,27 @@
+# Top-level EditorConfig file
+root = true
+
+# Applies to all files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Markdown files: keep trailing spaces for line breaks
+[*.md]
+trim_trailing_whitespace = false
+
+# JSON, YAML
+[*.{json,yml,yaml}]
+indent_size = 2
+
+# TypeScript & JavaScript
+[*.{ts,tsx,js,jsx}]
+indent_size = 2
+
+# HTML & CSS
+[*.{html,css}]
+indent_size = 2
