@@ -10,6 +10,16 @@ class AuthController {
     this.authService = AuthServiceInstance;
   }
 
+  registerUser = async (req: Request, res: Response) => {
+    try {
+      const userData = req.body;
+      const registeredUser = await this.authService.register(userData);
+      httpOK(res, registeredUser);
+    } catch (err) {
+      httpException(res, err, `[AuthController:] cannot register new user`);
+    }
+  };
+
   loginUser = async (req: Request, res: Response) => {
     const accountLoginReq:ILoginUser = req.body;
     try {

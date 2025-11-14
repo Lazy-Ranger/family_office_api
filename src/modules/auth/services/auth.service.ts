@@ -12,6 +12,7 @@ import {ILoginUser} from '../interfaces'
 
 export interface IAuthService {
   login: (req: ILoginUser) => Promise<LoggedInResponse>;
+  register: (userData: any) => Promise<User>;
 }
 
 class AuthService implements IAuthService {
@@ -22,6 +23,20 @@ class AuthService implements IAuthService {
     this.users = users;
     this.usersAccountService = UsersAccountServiceInstance;
     this.roleService = RoleService;
+  }
+
+  async register(userData: any): Promise<User> {
+    // Hash the password before storing
+    const salt = await bcrypt.genSalt(10);
+    userData.password = await bcrypt.hash(userData.password, salt);
+    
+    // Create the user
+    const user = await this.users.create(userData);
+    
+    // Remove sensitive data
+    const { password, ...userWithoutPassword } = user.toJSON();
+    
+    return userWithoutPassword;
   }
 
   private toJWTPayload(user: users): UserSession {

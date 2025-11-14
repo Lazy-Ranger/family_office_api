@@ -9,71 +9,74 @@ import {
 } from 'sequelize-typescript';
 import AssetCategory from './assetcategory';
 
-@Table({ tableName: 'asset_subcategories', freezeTableName: true, underscored: true, timestamps: true })
+@Table({
+  tableName: 'asset_subcategories',
+  freezeTableName: true,
+  underscored: true,
+  timestamps: true
+})
 export default class AssetSubCategory extends Model {
   @Column({
     primaryKey: true,
-    type: DataType.UUID,
-    defaultValue: DataType.UUIDV4
+    autoIncrement: true,
+    type: DataType.INTEGER,
   })
-  id!: string;
+  id!: number;
 
   @Column({
     allowNull: false,
-    type: DataType.STRING
+    type: DataType.STRING,
   })
   name!: string;
 
   @Column({
     allowNull: true,
-    type: DataType.TEXT
+    type: DataType.TEXT,
   })
   description!: string;
 
   @Column({
     allowNull: false,
     type: DataType.DECIMAL(20, 2),
-    defaultValue: 0
+    defaultValue: 0,
   })
   totalValue!: number;
 
   @Column({
     allowNull: false,
     type: DataType.DECIMAL(5, 2),
-    defaultValue: 0
+    defaultValue: 0,
   })
   portfolioPercentage!: number;
 
   @Column({
     allowNull: true,
-    type: DataType.JSONB
+    type: DataType.JSONB,
+    field: 'aggregated_kpis',
   })
-  aggregatedKPIs!: { [key: string]: number };
+  aggregatedKPIs!: Record<string, number>;
 
   @ForeignKey(() => AssetCategory)
   @Column({
     allowNull: false,
-    type: DataType.UUID,
-    references: {
-      model: 'AssetCategory',
-      key: 'id',
-    },
+    type: DataType.INTEGER,
   })
-  assetCategoryId!: string;
+  assetCategoryId!: number;
 
   @BelongsTo(() => AssetCategory)
   assetCategory!: AssetCategory;
 
   @Column({
     type: DataType.DATE,
-    defaultValue: literal('CURRENT_TIMESTAMP')
+    defaultValue: literal('CURRENT_TIMESTAMP'),
+    field: 'created_at'
   })
   createdAt!: Date;
 
   @Column({
     type: DataType.DATE,
-    defaultValue: literal('CURRENT_TIMESTAMP')
+    defaultValue: literal('CURRENT_TIMESTAMP'),
+    field: 'updated_at'
   })
   updatedAt!: Date;
 }
-

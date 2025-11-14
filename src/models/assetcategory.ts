@@ -6,84 +6,83 @@ import {
   DataType,
   HasMany,
 } from 'sequelize-typescript';
+import AssetSubCategory from './assetsubcategory';
 
-interface SubCategory {
-  id: string;
-  name: string;
-  description: string;
-  value: number;
-  percentage: number;
-  kpis: { [key: string]: number };
-}
-
-@Table({tableName: 'asset_categories', freezeTableName: true, underscored: true, timestamps: true })
+@Table({
+  tableName: 'asset_categories',
+  freezeTableName: true,
+  underscored: true,
+  timestamps: true,
+})
 export default class AssetCategory extends Model {
   @Column({
     primaryKey: true,
-    type: DataType.UUID,
-    defaultValue: DataType.UUIDV4
+    autoIncrement: true,
+    type: DataType.INTEGER,
   })
-  id!: string;
+  id!: number;
 
   @Column({
     allowNull: false,
-    type: DataType.STRING
+    type: DataType.STRING,
   })
   name!: string;
 
   @Column({
     allowNull: true,
-    type: DataType.TEXT
+    type: DataType.TEXT,
   })
   description!: string;
 
   @Column({
     allowNull: true,
-    type: DataType.STRING
+    type: DataType.STRING,
   })
   icon!: string;
 
   @Column({
     allowNull: true,
-    type: DataType.STRING
+    type: DataType.STRING,
   })
   color!: string;
 
   @Column({
     allowNull: false,
     type: DataType.DECIMAL(20, 2),
-    defaultValue: 0
+    defaultValue: 0,
+    field: 'total_value',
   })
   totalValue!: number;
 
   @Column({
     allowNull: false,
     type: DataType.DECIMAL(5, 2),
-    defaultValue: 0
+    defaultValue: 0,
+    field: 'portfolio_percentage',
   })
   portfolioPercentage!: number;
 
   @Column({
     allowNull: true,
-    type: DataType.JSONB
+    type: DataType.JSONB,
+    field: 'aggregated_kpis',
   })
-  aggregatedKPIs!: { [key: string]: number };
+  aggregatedKPIs!: Record<string, number>;
 
-  @Column({
-    allowNull: true,
-    type: DataType.JSONB
-  })
-  subCategories!: SubCategory[];
+  @HasMany(() => AssetSubCategory)
+  subCategories!: AssetSubCategory[];
 
   @Column({
     type: DataType.DATE,
-    defaultValue: literal('CURRENT_TIMESTAMP')
+    defaultValue: literal('CURRENT_TIMESTAMP'),
+    field: 'created_at',
   })
   createdAt!: Date;
 
   @Column({
     type: DataType.DATE,
-    defaultValue: literal('CURRENT_TIMESTAMP')
+    defaultValue: literal('CURRENT_TIMESTAMP'),
+    field: 'updated_at',
   })
   updatedAt!: Date;
 }

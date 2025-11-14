@@ -11,7 +11,10 @@ import {API_ROUTER} from './router';
 const app: express.Application = express();
 const errorHandler: ErrorHandlerMiddleware = new ErrorHandlerMiddleware();
 const corsOptions: CorsOptions = {
-  origin: CORS_WHITELIST?.split(','),
+  origin: CORS_WHITELIST
+    ? CORS_WHITELIST.split(',')
+    : ['http://localhost:8080'], // fallback for dev
+  credentials: true,
 };
 
 app.use(helmet({
@@ -24,6 +27,7 @@ app.use(helmet({
   xXssProtection: false,
 }));
 app.use(morgan('combined'));
+
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: false }));
 app.use(

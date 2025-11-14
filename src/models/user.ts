@@ -35,13 +35,11 @@ export default class users extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false })
   role_id!: number;
 
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  employee_id!: number;
 
   @Column({ type: DataType.STRING, allowNull: true })
   phone_number!: string;
-
-  @Column({ type: DataType.STRING, allowNull: true })
-  department!: string;
-
 
   @Column({ type: DataType.BOOLEAN, defaultValue: true })
   is_active!: boolean;
