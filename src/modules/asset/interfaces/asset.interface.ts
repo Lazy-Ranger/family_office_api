@@ -4,11 +4,10 @@ export interface IAsset {
   assetType?: string;
   acquisitionDate?: Date;
   currentValue: number;
-  ownerId?: string | number;
 
   // Relations / foreign keys
-  assetCategoryId?: string;
-  assetSubcategoryId?: string;
+  assetCategoryId?: number;
+  assetSubcategoryId?: number;
   entityId?: string;
 
   // Real estate / common fields
@@ -56,6 +55,20 @@ export interface IAsset {
   premiumAmount?: number;
   premiumFrequency?: string;
   policyRenewalDate?: Date;
+
+  //equity specific
+  reportDate?: Date;
+  security?: string;
+  securityName?: string;
+  quantity?: number;
+  averagePrice?: number;
+  acquisationCost?: number;
+  marketPrice?: number;
+  marketValue?: number;
+  unrealizedGainLoss?: number;
+  realizedGainLoss?: number;
+  accruedInterest?: number;
+  marketPriceDate?: Date;
 
   // Misc
   additionalNotes?: string;

@@ -19,11 +19,13 @@ class RoleService {
     private roles: typeof roles;
     private roleHasPermissions: typeof role_has_permissions;
     private permissions: typeof permissions;
+    private users: typeof users;
 
     constructor() {
         this.roles = roles;
         this.roleHasPermissions = role_has_permissions;
         this.permissions = permissions;
+        this.users = users;
     }
 
     createRole = async (roleBody: IRole, userId: number) => {

@@ -1,18 +1,30 @@
 import {users} from '../../../models';
+import { Op } from 'sequelize';
 import {
-  // NotFoundException,
-  // UnauthorizedException,
   ConflictException,
+  NotFoundException,
+  BadRequestException,
 } from "../../../utils/http";
 import { hash } from "bcrypt";
 import { BCRYPT_CONFIG } from "../../../config";
 import {IRegisterUser} from '../interface'
+import CacheService from '../../../shared/services/cache/cache.service';
+import { valueToBoolean } from '../../../utils/common';
 
 export interface IUsersAccountService {
   createUser: (req: IRegisterUser) => Promise<users>;
 }
 
+export interface IUsersAccountServiceExtended extends IUsersAccountService {
+  createUser: (req: IRegisterUser) => Promise<users>;
+  getUsers: () => Promise<users[]>;
+  // getUsersWithOptions?: (opts?: any) => Promise<{ rows: users[]; count: number }>;
+  updateUser: (id: number, updateData: Partial<users>) => Promise<users>;
+  deleteUser: (id: number, hardDelete?: boolean) => Promise<void>;
+}
+
 class UsersAccountService {
+  private nodeCache = new CacheService().getInstance();
   private users: typeof users;
   constructor() {
     this.users = users;
@@ -33,6 +45,131 @@ class UsersAccountService {
 
     return createUser;
   }
+  async clearUserCache(id: number): Promise<void> {
+    this.nodeCache.set(`user-role-${id}`, false);
+    let roleId = this.nodeCache.get(`user-role-${id}`);
+    if (!valueToBoolean(roleId)) {
+      const user = await users.findByPk(id);
+      roleId = user?.role_id;
+      this.nodeCache.set(`user-role-${id}`, roleId);
+    }
+    await this.users.update(
+      {
+        login_token: null,
+      },
+      {
+        where: { id },
+      } 
+    );
+
+    // clear cache
+    this.nodeCache.set(`role-permissions-${roleId}`, false);
+    this.nodeCache.flushAll();
+  }
+
+  getUsers = async (): Promise<users[]> => {
+
+    const usersList = await this.users.findAll({
+      attributes: { exclude: ['password', 'login_token'] },
+      order: [['id', 'ASC']],
+      limit: 100,
+    });
+    return usersList;
+  }
+  updateUser = async (id: number, updateData: Partial<users>): Promise<users> => {
+    if (!id || Number.isNaN(Number(id))) {
+      throw new BadRequestException('Invalid id');
+    }
+
+    const existing = await this.users.findByPk(id);
+    if (!existing) throw new NotFoundException('User not found');
+
+    // prevent email conflict
+    if (updateData.email && updateData.email !== existing.email) {
+      const taken = await this.users.findOne({ where: { email: updateData.email } });
+      if (taken) throw new ConflictException('Email already in use');
+    }
+
+    const toUpdate: Partial<any> = { ...updateData };
+    // hash password if provided
+    if (toUpdate.password) {
+      const hashed = await hash(String(toUpdate.password), BCRYPT_CONFIG.ROUNDS);
+      toUpdate.password = hashed;
+    }
+
+    await this.users.update(toUpdate, { where: { id } });
+    // invalidate cache
+    try { this.nodeCache.flushAll(); } catch (e) { /* noop */ }
+
+    const updated = await this.users.findByPk(id, { attributes: { exclude: ['password', 'login_token'] } });
+    if (!updated) throw new NotFoundException('User not found after update');
+    return updated;
+  }
+  
+  /**
+   * Soft delete by default (set is_active = false), hardDelete=true will permanently remove the record.
+   */
+  deleteUser = async (id: number, hardDelete = false): Promise<void> => {
+    if (!id || Number.isNaN(Number(id))) {
+      throw new BadRequestException('Invalid id');
+    }
+
+    const existing = await this.users.findByPk(id);
+    if (!existing) throw new NotFoundException('User not found');
+
+    if (hardDelete) {
+      await this.users.destroy({ where: { id } });
+    } else {
+      await this.users.update({ is_active: false, login_token: null }, { where: { id } });
+    }
+
+    // invalidate cache
+    try { this.nodeCache.flushAll(); } catch (e) { /* noop */ }
+  }
+  
+  // getUsersWithOptions = async (opts?: {
+  //   page?: number;
+  //   size?: number;
+  //   search?: string;
+  //   orderBy?: string;
+  //   order?: 'ASC' | 'DESC';
+  //   useCache?: boolean;
+  // }): Promise<{ rows: users[]; count: number }> => {
+  //   const page = Math.max(1, Number(opts?.page ?? 1));
+  //   const size = Math.min(1000, Math.max(1, Number(opts?.size ?? 50)));
+  //   const offset = (page - 1) * size;
+  //   const orderBy = opts?.orderBy || 'id';
+  //   const order = opts?.order || 'ASC';
+  //   const useCache = opts?.useCache ?? true;
+
+  //   const cacheKey = `users:page=${page}:size=${size}:search=${opts?.search ?? ''}:orderBy=${orderBy}:order=${order}`;
+  //   if (useCache) {
+  //     const cached = this.nodeCache.get(cacheKey) as { rows: users[]; count: number } | undefined;
+  //     if (cached) return cached;
+  //   }
+
+  //   const where: any = {};
+  //   if (opts?.search) {
+  //     const q = opts.search.trim();
+  //     where[Op.or] = [
+  //       { email: { [Op.iLike]: `%${q}%` } },
+  //       { first_name: { [Op.iLike]: `%${q}%` } },
+  //       { last_name: { [Op.iLike]: `%${q}%` } },
+  //     ];
+  //   }
+
+  //   const result = await this.users.findAndCountAll({
+  //     where,
+  //     attributes: { exclude: ['password', 'login_token'] },
+  //     order: [[orderBy, order]],
+  //     limit: size,
+  //     offset,
+  //   });
+
+  //   const payload = { rows: result.rows, count: result.count };
+  //   if (useCache) this.nodeCache.set(cacheKey, payload, 60); // cache for 60s
+  //   return payload;
+  // };
 }
 
 export const UsersAccountServiceInstance = new UsersAccountService();

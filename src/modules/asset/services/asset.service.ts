@@ -1,12 +1,10 @@
+import loggerService from '../../../shared/services/logger.service';
 import asset from '../../../models/asset';
 import { NotFoundException, BadRequestException } from '../../../utils/http';
-import { createAssetSchema, updateAssetSchema } from '../schemas/asset.schema';
 
 export interface IAssetService {
-  // optional userId parameter allows services or controllers to stamp created_by/updated_by
   createAsset: (body: any, userId?: number) => Promise<any>;
-  // getAssets supports optional pagination/filtering options; when pagination provided returns {data, count}
-  getAssets: (options?: { page?: number; limit?: number; filters?: any; sortField?: string; sortOrder?: 'ASC' | 'DESC' }) => Promise<any[] | { data: any[]; count: number }>;
+  getAssets: (userId:number,options?: { page?: number; limit?: number; filters?: any; sortField?: string; sortOrder?: 'ASC' | 'DESC' }) => Promise<any[] | { data: any[]; count: number }>;
   updateAsset: (id: number, body: any, userId?: number) => Promise<any>;
   deleteAsset: (id: number) => Promise<void>;
 }
@@ -19,27 +17,29 @@ class AssetService implements IAssetService {
   }
 
   async createAsset(body: any, userId?: number) {
-    try {
-      await createAssetSchema.validateAsync(body, { abortEarly: false });
-    } catch (err: any) {
-      const msg = Array.isArray(err?.details)
-        ? err.details.map((d: any) => d.message).join(', ')
-        : err.message || 'Invalid asset payload';
-      throw new BadRequestException(msg);
-    }
-
-    // if userId passed (e.g., from authenticated request), stamp auditing fields
     if (userId) {
       body.created_by = userId;
       body.updated_by = userId;
     }
-
+    try {
     const created = await this.assetModel.create(body as any);
-    // return plain object
+    const log = await loggerService.log({
+        userId: userId,
+        action: "ASSET_CREATED",
+        method: "POST",
+        endpoint: "/assets/add",
+        reqBody: body,
+        resBody: created,
+        // ip_address: body.ip_address,
+        statusCode: 201
+    });
     return (created.toJSON ? created.toJSON() : created) as any;
+    } catch (error) {
+      throw error;
+    }
   }
 
-  async getAssets(options?: { page?: number; limit?: number; filters?: any; sortField?: string; sortOrder?: 'ASC' | 'DESC' }) {
+  async getAssets(userId:number,options?: { page?: number; limit?: number; filters?: any; sortField?: string; sortOrder?: 'ASC' | 'DESC' }) {
     // If pagination options provided, return paginated response
     if (options && options.page && options.limit) {
       const page = Math.max(1, Math.floor(Number(options.page) || 1));
@@ -64,21 +64,21 @@ class AssetService implements IAssetService {
 
     // default: return full list with associations
     const list = await this.assetModel.findAll({ include: [{ all: true, nested: true }] });
+    await loggerService.log({
+        userId: userId,
+        action: "ASSET_DATA_RETRIEVED",
+        method: "GET",
+        endpoint: "/assets/data",
+        reqBody: null,
+        resBody: list,
+        statusCode: 201
+    });
     return list.map((i) => (i.toJSON ? i.toJSON() : i)) as any[];
   }
 
   async updateAsset(id: number, body: any, userId?: number) {
     if (!id) {
       throw new BadRequestException('id is required');
-    }
-
-    try {
-      await updateAssetSchema.validateAsync(body, { abortEarly: false });
-    } catch (err: any) {
-      const msg = Array.isArray(err?.details)
-        ? err.details.map((d: any) => d.message).join(', ')
-        : err.message || 'Invalid asset payload';
-      throw new BadRequestException(msg);
     }
 
     if (userId) {
@@ -94,6 +94,15 @@ class AssetService implements IAssetService {
     if (!updated) {
       throw new NotFoundException('Asset not found');
     }
+      await loggerService.log({
+        userId: userId,
+        action: "ASSET_UPDATED",
+        method: "PATCH",
+        endpoint: `/assets/${userId}`,
+        reqBody: body,
+        resBody: updated,
+        statusCode: 201
+    });
     return (updated.toJSON ? updated.toJSON() : updated) as any;
   }
 
@@ -106,7 +115,15 @@ class AssetService implements IAssetService {
     if (deletedRows === 0) {
       throw new NotFoundException('Asset not found');
     }
-
+      await loggerService.log({
+        userId: id,
+        action: "ASSET_DELETED",
+        method: "DELETE",
+        endpoint: `/assets/${id}`,
+        reqBody: null,
+        resBody: null,
+        statusCode: 201
+    });
     return;
   }
 }

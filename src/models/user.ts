@@ -3,11 +3,8 @@ import {
   Column,
   Model,
   DataType,
-  HasMany,
-  AllowNull
 } from 'sequelize-typescript';
 import { literal } from 'sequelize';
-import { allow } from 'joi';
 
 @Table({ freezeTableName: true, underscored: true, timestamps: false })
 export default class users extends Model {
@@ -47,6 +44,12 @@ export default class users extends Model {
 
   @Column({ type: DataType.DATE, allowNull: true })
   last_login!: Date;
+
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  created_by!: number;
+
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  updated_by!: number;
 
 
   @Column({

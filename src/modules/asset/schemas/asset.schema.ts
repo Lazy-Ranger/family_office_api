@@ -2,18 +2,17 @@ import Joi from "joi";
 
 // Schema for creating an asset
 export const createAssetSchema = Joi.object({
-    assetTitle: Joi.string().min(1).max(255).required().messages({
-        'string.empty': 'Asset title is required',
+    assetTitle: Joi.string().min(1).max(255).optional().allow(null, ''),
+    securityName: Joi.string().optional().allow(null, ''),
+    // Category/subcategory are numeric ids in DB
+    assetCategoryId: Joi.number().integer().required().messages({
+        'number.base': 'assetCategoryId must be a number',
+        'any.required': 'assetCategoryId is required',
     }),
 
-    assetCategoryId: Joi.string().uuid().required().messages({
-        'string.empty': 'assetCategoryId is required',
-        'string.guid': 'assetCategoryId must be a valid UUID',
-    }),
-
-    assetSubcategoryId: Joi.string().uuid().required().messages({
-        'string.empty': 'assetSubcategoryId is required',
-        'string.guid': 'assetSubcategoryId must be a valid UUID',
+    assetSubcategoryId: Joi.number().integer().required().messages({
+        'number.base': 'assetSubcategoryId must be a number',
+        'any.required': 'assetSubcategoryId is required',
     }),
 
     entityId: Joi.string().uuid().required().messages({
@@ -32,7 +31,6 @@ export const createAssetSchema = Joi.object({
     // Real estate / common fields
     purchaseDate: Joi.date().optional().allow(null),
     purchasePrice: Joi.number().precision(2).optional().allow(null),
-    ownerId: Joi.string().uuid().optional().allow(null),
     location: Joi.string().max(255).optional().allow(null),
     acquiredDate: Joi.date().optional().allow(null),
     document: Joi.string().max(255).optional().allow(null),
@@ -75,25 +73,36 @@ export const createAssetSchema = Joi.object({
     premiumAmount: Joi.number().precision(2).optional().allow(null),
     premiumFrequency: Joi.string().optional().allow(null),
     policyRenewalDate: Joi.date().optional().allow(null),
+    reportDate: Joi.date().optional().allow(null, ''),
+    security: Joi.string().optional().allow(null, ''),
+    quantity: Joi.number().precision(4).optional().allow(null, ''),
+    averagePrice: Joi.number().precision(2).optional().allow(null, ''),
+    acquisationCost: Joi.number().precision(2).optional().allow(null, ''),
+    marketPrice: Joi.number().precision(2).optional().allow(null, ''),
+    marketValue: Joi.number().precision(2).optional().allow(null, ''),
+    unrealizedGainLoss: Joi.number().precision(2).optional().allow(null, ''),
+    realizedGainLoss: Joi.number().precision(2).optional().allow(null, ''),
+    accruedInterest: Joi.number().precision(2).optional().allow(null, ''),
+    marketPriceDate: Joi.date().optional().allow(null, ''),
+
 
     additionalNotes: Joi.string().optional().allow(null),
 
-    // Auditing fields — required by model; make required for create
-    created_by: Joi.number().integer().required().messages({
+    // Auditing fields — stamp server-side when possible; make optional so
+    // unauthenticated clients (or tests) won't get a validation error.
+    created_by: Joi.number().integer().optional().allow(null).messages({
         'number.base': 'created_by must be a number',
-        'any.required': 'created_by is required',
     }),
-    updated_by: Joi.number().integer().required().messages({
+    updated_by: Joi.number().integer().optional().allow(null).messages({
         'number.base': 'updated_by must be a number',
-        'any.required': 'updated_by is required',
     }),
 });
 
 // Schema for updating an asset — all fields optional
 export const updateAssetSchema = Joi.object({
     assetTitle: Joi.string().min(1).max(255).optional(),
-    assetCategoryId: Joi.string().uuid().optional(),
-    assetSubcategoryId: Joi.string().uuid().optional(),
+    assetCategoryId: Joi.number().integer().optional(),
+    assetSubcategoryId: Joi.number().integer().optional(),
     entityId: Joi.string().uuid().optional(),
     assetType: Joi.string().optional(),
     acquisitionDate: Joi.date().optional().allow(null),
@@ -135,6 +144,20 @@ export const updateAssetSchema = Joi.object({
     premiumAmount: Joi.number().precision(2).optional().allow(null),
     premiumFrequency: Joi.string().optional().allow(null),
     policyRenewalDate: Joi.date().optional().allow(null),
+    reportDate: Joi.date().optional(),
+    security: Joi.string().optional().allow(null, ''),
+    securityName: Joi.string().optional().allow(null, ''),
+    quantity: Joi.number().precision(4).optional(),
+    averagePrice: Joi.number().precision(2).optional(),
+    purchaseDateSecurity: Joi.date().optional(),
+    acquisationCost: Joi.number().precision(2).optional(),
+    marketPrice: Joi.number().precision(2).optional(),
+    marketValue: Joi.number().precision(2).optional(),
+    unrealizedGainLoss: Joi.number().precision(2).optional(),
+    realizedGainLoss: Joi.number().precision(2).optional(),
+    accruedInterest: Joi.number().precision(2).optional(),
+    marketPriceDate: Joi.date().optional(),
+
     additionalNotes: Joi.string().optional().allow(null),
     created_by: Joi.number().integer().optional(),
     updated_by: Joi.number().integer().optional(),

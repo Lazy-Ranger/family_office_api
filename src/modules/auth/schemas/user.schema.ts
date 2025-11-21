@@ -34,6 +34,10 @@ export const createUserSchema = Joi.object({
 
   last_login: Joi.date().iso().optional(),
 
+  // audit fields (optional, server should normally set these)
+  created_by: Joi.number().integer().optional().allow(null),
+  updated_by: Joi.number().integer().optional().allow(null),
+
   created_at: Joi.date().iso().optional(),
   updated_at: Joi.date().iso().optional(),
 });

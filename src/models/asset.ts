@@ -61,7 +61,7 @@ export default class asset extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false })
   currentValue!: number;
 
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column({ type: DataType.STRING, allowNull: true })
   assetTitle!: string;
 
   // Real Estate Properties
@@ -71,20 +71,6 @@ export default class asset extends Model {
   @Column({ type: DataType.DECIMAL(10, 2), allowNull: true })
   purchasePrice!: number;
 
-  @ForeignKey(() => Entity)
-  @Column({
-    allowNull: true,
-    type: DataType.UUID,
-    field: 'owner_id',
-    references: {
-      model: 'asset_entity',
-      key: 'id',
-    },
-  })
-  ownerId!: string;
-
-  @BelongsTo(() => Entity, { foreignKey: 'ownerId' })
-  owner!: Entity;
   @Column({ type: DataType.STRING, allowNull: true })
   location!: string;
 
@@ -187,6 +173,44 @@ export default class asset extends Model {
 
   @Column({ type: DataType.DATE, allowNull: true })
   policyRenewalDate!: Date;
+
+  // Equity specific
+  @Column({ type: DataType.DATE, allowNull: true })
+  reportDate!: Date;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  security!: string;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  securityName!: string;
+
+  @Column({ type: DataType.DECIMAL(20, 4), allowNull: true })
+  quantity!: number;
+
+  @Column({ type: DataType.DECIMAL(20, 2), allowNull: true })
+  averagePrice!: number;
+
+  @Column({ type: DataType.DECIMAL(20, 2), allowNull: true })
+  acquisationCost!: number;
+
+  @Column({ type: DataType.DECIMAL(20, 2), allowNull: true })
+  marketPrice!: number;
+
+  @Column({ type: DataType.DECIMAL(20, 2), allowNull: true })
+  marketValue!: number;
+
+  @Column({ type: DataType.DECIMAL(20, 2), allowNull: true })
+  unrealizedGainLoss!: number;
+
+  @Column({ type: DataType.DECIMAL(20, 2), allowNull: true })
+  realizedGainLoss!: number;
+
+  @Column({ type: DataType.DECIMAL(20, 2), allowNull: true })
+  accruedInterest!: number;
+
+  @Column({ type: DataType.DATE, allowNull: true })
+  marketPriceDate!: Date;
+
 
   @Column({ type: DataType.TEXT, allowNull: true })
   additionalNotes!: string;

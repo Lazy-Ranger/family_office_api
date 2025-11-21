@@ -4,6 +4,7 @@ import { Request } from "express";
 export interface UserSession {
   id: number;
   email: string;
+  roleId: number;
   profile: {
     name?: string;
   };

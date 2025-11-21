@@ -38,4 +38,6 @@ export const PERMISSIONS = {
   ALL: 'AllPermissions',
   LIST_ROLE: 'ListRole',
   CREATE_ROLE: 'CreateRole',
+  UPDATE_ROLE: 'UpdateRole',
+  DELETE_ROLE: 'DeleteRole',
 } as const;

@@ -1,9 +1,10 @@
+import roleService from '../../roles/service/role.service';
 import { AssetCategory, AssetSubCategory,Entity, family } from '../../../models';
 import { ServiceUnavailableException } from '../../../utils/http';
 
 export interface IMasterService {
 
-  master: (categoryId?: string) => Promise<{ category: any[] }>;
+  master: (userId?: number, categoryId?: string) => Promise<{ category: any[] }>;
 }
 
 class MasterService implements IMasterService {
@@ -14,9 +15,8 @@ class MasterService implements IMasterService {
 
   constructor() {}
 
-  async master(categoryId?: string) {
+  async master(userId?: number, categoryId?: string) {
     try {
-      // fetch categories and subcategories in parallel
       const [categoriesRaw, subcatsRaw] = await Promise.all([
         this.CategoryModel.findAll({ order: [['name', 'ASC']], raw: true }),
         this.SubCategoryModel.findAll({ order: [['name', 'ASC']], raw: true }),
@@ -27,21 +27,33 @@ class MasterService implements IMasterService {
       for (const s of subcatsRaw) {
         const key = (s as any).assetCategoryId as string;
         if (!subMap[key]) subMap[key] = [];
-        subMap[key].push({ label: (s as any).name, value: (s as any).id });
+        subMap[key].push({ label: s.name, 
+            description: s.description,
+            totalValue: s.totalValue,
+             portfolioPercentage: s.portfolioPercentage,
+             aggregatedKPIs: s.aggregatedKPIs,
+            value: s.id,
+             });
       }
       const family = await this.family.findAll({ order: [['groupName', 'ASC']], raw: true });
-      // build result array
       const categories = (categoriesRaw as any[])
         .filter((c) => (categoryId ? c.id === categoryId : true))
         .map((c) => ({
           label: c.name,
           value: c.id,
+          icon: c.icon,
+          description: c.description,
+          color: c.color,
+          totalValue: c.totalValue,
+          portfolioPercentage: c.portfolioPercentage,
+          aggregatedKPIs: c.aggregatedKPIs,
           subcategory: subMap[c.id] || [],
         }));
-
+     const permissions = await roleService.getPermissions(userId!);
       return { category: categories,
                entity: entity,
-               family: family  
+               family: family,
+               permissions: permissions  
             };
     } catch (err) {
       throw new ServiceUnavailableException(err, 'Failed to retrieve data');

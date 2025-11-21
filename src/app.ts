@@ -7,6 +7,7 @@ import { rateLimit } from 'express-rate-limit';
 import ErrorHandlerMiddleware from './shared/middlewares/errorHandlerMiddleware';
 import { CORS_WHITELIST, RATE_LIMIT } from './config';
 import {API_ROUTER} from './router';
+import { requestLogger } from './shared/middlewares/requestLogger';
 
 const app: express.Application = express();
 const errorHandler: ErrorHandlerMiddleware = new ErrorHandlerMiddleware();
@@ -27,7 +28,7 @@ app.use(helmet({
   xXssProtection: false,
 }));
 app.use(morgan('combined'));
-
+app.use(requestLogger);
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: false }));
 app.use(

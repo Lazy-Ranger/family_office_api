@@ -11,10 +11,12 @@ class MasterController {
 
 	master = async (req: Request, res: Response) => {
 		try {
-			const data = await this.service.master();
+            const user = (req as any).user;
+            const userId = user?.id;
+			const data = await this.service.master(userId);
 			httpOK(res, data);
 		} catch (err) {
-			httpException(res, err, `[MasterController:] cannot list asset categories`);
+			httpException(res, err, `[MasterController:] cannot list the data`);
 		}
 	};
 

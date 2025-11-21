@@ -5,15 +5,20 @@ import AssetService from '../services/asset.service';
 class AssetController {
 	createAsset = async (req: Request, res: Response) => {
 		try {
-			const newAsset = await AssetService.createAsset(req.body);
+			const userSession = (req as any).user;
+			const userId = userSession?.id;
+			const newAsset = await AssetService.createAsset(req.body, userId);
 			return res.status(201).json(newAsset);
 		} catch (error) {
-			return res.status(400).json({ error: (error as Error).message });
+			const msg = (error as any)?.message || 'Internal server error';
+			return res.status((error as any)?.statusCode || 400).json({ error: msg });
 		}
 	}
 	getAssets = async (req: Request, res: Response) => {
 		try {
-			const assetsList = await AssetService.getAssets();
+			const userSession = (req as any).user;
+			const userId = userSession?.id;
+			const assetsList = await AssetService.getAssets(userId);
 			return res.status(200).json(assetsList);
 		} catch (error) {
 			return res.status(500).json({ error: (error as Error).message });
@@ -22,10 +27,12 @@ class AssetController {
 	updateAsset = async (req: Request, res: Response) => {
 		try {
 			const { id } = req.params;
-			const updatedAsset = await AssetService.updateAsset(Number(id), req.body);
+			const userSession = (req as any).user;
+			const userId = userSession?.id;
+			const updatedAsset = await AssetService.updateAsset(Number(id), req.body, userId);
 			return res.status(200).json(updatedAsset);
 		} catch (error) {
-			return res.status(500).json({ error: (error as Error).message });
+			return res.status((error as any)?.statusCode || 500).json({ error: (error as any)?.message || (error as Error).message });
 		}
 	}
 	deleteAsset = async (req: Request, res: Response) => {

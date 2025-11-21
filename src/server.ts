@@ -10,9 +10,7 @@ const port =
 const connections = [sequelize.authenticate()];
 Promise.all(connections)
   .then(() => {
-    console.log('Connection to DB has been established successfully.');
     app.listen(port, (): void => {
-      // eslint-disable-next-line no-console
       console.log(`Server running in port ${port}`);
     });
   })

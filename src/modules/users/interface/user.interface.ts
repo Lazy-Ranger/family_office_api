@@ -7,4 +7,6 @@ export interface IRegisterUser {
   role_id: number;
   phone_number?: string;
   department?: string;
+  created_by?: number;
+  updated_by?: number;
 }
