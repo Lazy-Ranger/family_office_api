@@ -18,7 +18,14 @@ class AssetController {
 		try {
 			const userSession = (req as any).user;
 			const userId = userSession?.id;
-			const assetsList = await AssetService.getAssets(userId);
+			const { page, limit, sortField, sortOrder, ...filters } = req.query;
+			const assetsList = await AssetService.getAssets(userId, {
+					page: page ? Number(page) : undefined,
+					limit: limit ? Number(limit) : undefined,
+					sortField: sortField as string,
+					sortOrder: (sortOrder as any) || 'ASC',
+					filters,
+					});
 			return res.status(200).json(assetsList);
 		} catch (error) {
 			return res.status(500).json({ error: (error as Error).message });

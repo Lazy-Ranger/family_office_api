@@ -11,6 +11,10 @@ export interface IRoleService {
     createRole: (roleBody: IRole, userId: number) => Promise<void>;
     getPermissions: (id: number) => Promise<string[]>;
     listRoles: (body: IGetBody) => Promise<{ data: roles[], count: number }>;
+    getAllPermissions: () => Promise<permissions[]>;
+    listRolePermissions?: (roleId: number) => Promise<{ permissions: any[]; role: string }>;
+    editRole: (id: number, roleBody: IRole, userId: number) => Promise<void>;
+    deleteRole: (id: number, hardDelete?: boolean) => Promise<void>;
 }
 
 
@@ -63,7 +67,15 @@ class RoleService {
             sizePerPage: limit,
         } = body;
         const offset = (page - 1) * limit;
-        const filter = JSON.parse(filters);
+        let filter: any = {};
+        if (filters) {
+            try {
+                filter = typeof filters === 'string' ? JSON.parse(filters) : filters;
+            } catch (e) {
+                filter = {};
+                console.log('Error parsing filters string:', e);
+            }
+        }
         const whereList: WhereOptions = [];
         let order: Order = [[sortField, sortOrder.toUpperCase()]];
         if (sortField === 'role') {
@@ -89,7 +101,7 @@ class RoleService {
             limit,
             raw: true
         });
-
+        console.log('List Roles - Retrieved Rows:', rows);
         return {
             data: rows,
             count,
@@ -126,7 +138,73 @@ class RoleService {
         }
         return valueToBoolean(rolePermissions) ? (rolePermissions as string[]) : [];
     }
+    getAllPermissions = async (): Promise<permissions[]> => {
+        const permissionList = await this.permissions.findAll({
+            where: { status: 1 },
+            order: [['permission', 'ASC']],
+            raw: true,
+        });
+        return permissionList;
+    }
+    listRolePermissions = async (roleId: number): Promise<{ permissions: any[]; role: string }> => {
+        const selected = await this.roleHasPermissions.findAll({ where: { role_id: roleId }, raw: true });
+        const permIds = (selected || []).map((s: any) => s.permission_id).filter(Boolean);
+        if (!permIds || permIds.length === 0) return { permissions: [], role: '' };
+        const perms = await this.permissions.findAll({ where: { id: permIds, status: 1 }, raw: true });
+        const role = await this.roles.findOne({ where: { id: roleId }, raw: true });
+        const roleName = (role && (role as any).role) ? (role as any).role : '';
+        console.log('Role Permissions Data:', perms, roleName);
+        return {
+            permissions: perms,
+            role: roleName,
+        }
+    }
 
+    editRole = async (id: number, roleBody: IRole, userId: number) => {
+        const { name, permissions } = roleBody;
+        const role = await this.roles.findOne({ where: { role: name } });
+        console.log('Edit Role - Found Role:', role);
+        if (!role) {
+            throw new BadRequestException(ERRORS_LITERAL.ROLE_NOT_FOUND);
+        }
+        const updated = await this.roles.update(
+            {
+                role: name,
+                updated_by: userId,
+                permissions: permissions,
+            },
+            { where: { id } }
+        );
+        console.log('Edit Role - Update Result:', updated);
+        const existingPermissions = await this.permissions.findAll({
+            where: {
+                status: 1,
+                id: permissions,
+            },
+        });
+        await this.roleHasPermissions.destroy({ where: { role_id: id } });
+        await this.roleHasPermissions.bulkCreate(
+            existingPermissions.map((p) => ({
+                role_id: id,
+                permission_id: p.id,
+            }))
+        );
+    }
+
+    deleteRole = async (id: number, data: any) => {
+        if (!id) {
+            throw new BadRequestException('id is required');
+        }
+        console.log('Delete Role - Role ID:', id, "data:", data);
+        if (data.enable) {
+            const updateRole1 = await this.roles.update({ status: 1 }, { where: { id } });
+            console.log('Delete Role - Enable Role Result:', updateRole1, Boolean(updateRole1));
+        } else {
+            const updateRole = await this.roles.update({ status: 0 }, { where: { id } });
+            console.log('Delete Role - disable Delete Result:', updateRole, Boolean(updateRole));
+        }
+
+    }
 }
 
 export default new RoleService();

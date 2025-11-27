@@ -31,7 +31,56 @@ class RolesController {
             httpException(res, err, `[Roles Controller:] cannot list roles`);
         }
     }
-
+    listPermissions = async (req: Request, res: Response) => {
+        try {
+            const roleId = Number(req.params.id);
+            const data = await this.roleService.getPermissions(roleId);
+            httpOK(res, data);
+        } catch (err) {
+            httpException(res, err, `[Roles Controller:] cannot list role permissions`);
+        }   
+    }
+    listAllPermissions = async (req: Request, res: Response) => {
+        try {
+            const data = await this.roleService.getAllPermissions();
+            httpOK(res, data);
+        } catch (err) {
+            httpException(res, err, `[Roles Controller:] cannot list permissions`);
+        }
+    }
+    
+    edit = async (req: Request, res: Response) => {
+        try {
+            const userSession = (req as HttpSessionRequest).user;
+            const roleId = Number(req.params.id);
+            const body = req.body as IRole
+            const data = await this.roleService.editRole(roleId, body, userSession.id);
+            httpOK(res, data);
+        } catch (err) {
+            httpException(res, err, `[Roles Controller:] cannot edit role`);
+        }
+    }
+    listRolePermissions = async (req: Request, res: Response) => {
+        try {
+            const roleId = Number(req.params.id);
+            const data = await this.roleService.listRolePermissions!(roleId);
+            console.log('Role Permissions Data:', data);
+            httpOK(res, data);
+        } catch (err) {
+            httpException(res, err, `[Roles Controller:] cannot list role permissions`);
+        }
+    }
+    delete = async (req: Request, res: Response) => {
+        try {
+            const roleId = Number(req.params.id);
+            const data = req.body;
+            console.log('Delete Role - Request Body Data:', data);
+            await this.roleService.deleteRole(roleId, data);
+            httpOK(res, { success: true });
+        } catch (err) {
+            httpException(res, err, `[Roles Controller:] cannot delete role`);
+        }
+    }
 }
 
 export default new RolesController();

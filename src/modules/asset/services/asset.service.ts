@@ -106,14 +106,14 @@ class AssetService implements IAssetService {
     return (updated.toJSON ? updated.toJSON() : updated) as any;
   }
 
-  async deleteAsset(id: number) {
+  async deleteAsset(id: number, hardDelete = false): Promise<void> {
     if (!id) {
       throw new BadRequestException('id is required');
     }
-
-    const deletedRows = await this.assetModel.destroy({ where: { id } });
-    if (deletedRows === 0) {
-      throw new NotFoundException('Asset not found');
+    if (!hardDelete) {
+      await this.assetModel.update({ is_active: false }, { where: { id } });  
+    } else {
+      await this.assetModel.destroy({ where: { id } });
     }
       await loggerService.log({
         userId: id,

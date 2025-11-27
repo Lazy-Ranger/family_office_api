@@ -1,5 +1,5 @@
 import roleService from '../../roles/service/role.service';
-import { AssetCategory, AssetSubCategory,Entity, family } from '../../../models';
+import { AssetCategory, AssetSubCategory,Entity, family, roles, users } from '../../../models';
 import { ServiceUnavailableException } from '../../../utils/http';
 
 export interface IMasterService {
@@ -12,7 +12,8 @@ class MasterService implements IMasterService {
   private SubCategoryModel = AssetSubCategory;
   private Entity = Entity;
   private family = family;
-
+  private Role = roles;
+  private user = users;
   constructor() {}
 
   async master(userId?: number, categoryId?: string) {
@@ -50,10 +51,14 @@ class MasterService implements IMasterService {
           subcategory: subMap[c.id] || [],
         }));
      const permissions = await roleService.getPermissions(userId!);
+     const usersList = await this.user.findAll();
+     const roles = await this.Role.findAll({ where: { status: 1 }, raw: true });
       return { category: categories,
                entity: entity,
                family: family,
-               permissions: permissions  
+               permissions: permissions,
+               roles: roles, 
+               users: usersList 
             };
     } catch (err) {
       throw new ServiceUnavailableException(err, 'Failed to retrieve data');

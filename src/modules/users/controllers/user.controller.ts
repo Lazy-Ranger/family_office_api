@@ -11,7 +11,7 @@ class UserController {
     }
 
     registerUser = async (req: Request, res: Response) => {
-        const createAccountReq = req.body as IRegisterUser;
+        const createAccountReq: IRegisterUser = req.body;
 
         try {
             const loggedInUser = await this.userService.createUser(
@@ -27,6 +27,7 @@ class UserController {
     getUsers = async (req: Request, res: Response) => {
         try {
             const usersList = await this.userService.getUsers();
+            console.log('Users List:', usersList);
             httpOK(res, usersList);
         } catch (err) {
             httpException(res, err, `[UserController:] cannot fetch users`);
@@ -47,9 +48,8 @@ class UserController {
     deleteUser = async (req: Request, res: Response) => {
         try {
             const id = Number(req.params.id);
-            // allow hard delete via query param ?hard=true or body { hard: true }
-            const hard = (req.query.hard === 'true') || (req.body && req.body.hard === true);
-            await this.userService.deleteUser(id, Boolean(hard));
+            const data = req.body;
+            await this.userService.deleteUser(id, data);
             httpOK(res, { success: true });
         } catch (err) {
             httpException(res, err, `[UserController:] cannot delete user`);

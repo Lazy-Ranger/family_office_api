@@ -19,9 +19,6 @@ export default class roles extends Model {
   @Column({ allowNull: false, defaultValue: 0 })
   approved_by!: string;
 
-  @Column(DataType.JSONB)
-  temp!: object;
-
   @Column({
     type: DataType.DATE,
     defaultValue: literal('CURRENT_TIMESTAMP'),

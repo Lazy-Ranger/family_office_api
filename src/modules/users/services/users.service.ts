@@ -10,6 +10,7 @@ import { BCRYPT_CONFIG } from "../../../config";
 import {IRegisterUser} from '../interface'
 import CacheService from '../../../shared/services/cache/cache.service';
 import { valueToBoolean } from '../../../utils/common';
+import loggerService from '../../../shared/services/logger.service';
 
 export interface IUsersAccountService {
   createUser: (req: IRegisterUser) => Promise<users>;
@@ -35,14 +36,23 @@ class UsersAccountService {
     const isUserExits = await this.users.findOne({
       where: { email: userRegistrationData.email },
     });
-
+    console.log("userRegistrationData:", userRegistrationData);
     if (isUserExits) {
       throw new ConflictException("User already exists");
     }
     const hashedPassword = await hash(userRegistrationData.password, BCRYPT_CONFIG.ROUNDS);
     userRegistrationData.password = hashedPassword; 
     const createUser = await this.users.create({...userRegistrationData, password: hashedPassword});
-
+    const log = await loggerService.log({
+            // userId: userId,
+            action: "USER_CREATED",
+            method: "POST",
+            endpoint: "/users/create",
+            reqBody: userRegistrationData,
+            resBody: createUser,
+            // ip_address: body.ip_address,
+            statusCode: 201
+        });
     return createUser;
   }
   async clearUserCache(id: number): Promise<void> {
@@ -70,9 +80,10 @@ class UsersAccountService {
   getUsers = async (): Promise<users[]> => {
 
     const usersList = await this.users.findAll({
+      where: { is_active: true },
       attributes: { exclude: ['password', 'login_token'] },
       order: [['id', 'ASC']],
-      limit: 100,
+      limit: 10,
     });
     return usersList;
   }
@@ -84,46 +95,42 @@ class UsersAccountService {
     const existing = await this.users.findByPk(id);
     if (!existing) throw new NotFoundException('User not found');
 
-    // prevent email conflict
     if (updateData.email && updateData.email !== existing.email) {
       const taken = await this.users.findOne({ where: { email: updateData.email } });
       if (taken) throw new ConflictException('Email already in use');
     }
 
     const toUpdate: Partial<any> = { ...updateData };
-    // hash password if provided
     if (toUpdate.password) {
       const hashed = await hash(String(toUpdate.password), BCRYPT_CONFIG.ROUNDS);
       toUpdate.password = hashed;
     }
 
     await this.users.update(toUpdate, { where: { id } });
-    // invalidate cache
-    try { this.nodeCache.flushAll(); } catch (e) { /* noop */ }
+    try { this.nodeCache.flushAll(); } catch (e) { }
 
     const updated = await this.users.findByPk(id, { attributes: { exclude: ['password', 'login_token'] } });
     if (!updated) throw new NotFoundException('User not found after update');
     return updated;
   }
-  
-  /**
-   * Soft delete by default (set is_active = false), hardDelete=true will permanently remove the record.
-   */
-  deleteUser = async (id: number, hardDelete = false): Promise<void> => {
+  deleteUser = async (id: number, data: any): Promise<void> => {
     if (!id || Number.isNaN(Number(id))) {
       throw new BadRequestException('Invalid id');
     }
 
-    const existing = await this.users.findByPk(id);
+    try {
+      const existing = await this.users.findByPk(id);
     if (!existing) throw new NotFoundException('User not found');
 
-    if (hardDelete) {
-      await this.users.destroy({ where: { id } });
+    if (data.enable) {
+      await this.users.update({ is_active: true }, { where: { id } });
     } else {
-      await this.users.update({ is_active: false, login_token: null }, { where: { id } });
+      await this.users.update({ is_active: false }, { where: { id } });
+    }
+    } catch (error) {
+      console.error('User not found', error);
     }
 
-    // invalidate cache
     try { this.nodeCache.flushAll(); } catch (e) { /* noop */ }
   }
   

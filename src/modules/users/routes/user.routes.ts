@@ -8,7 +8,7 @@ import { canAny } from '../../../shared/middlewares/authorized-token.middleware'
 export const USERS_ROUTER = Router();
 const { validate } = new ValidatorMiddleware();
 
-USERS_ROUTER.post("/create", validate(createUserSchema), USERS_CONTROLLER.registerUser);
-USERS_ROUTER.get("/list", USERS_CONTROLLER.getUsers);
-USERS_ROUTER.patch("/update/:id", canAny([PERMISSIONS.UPDATE_ROLE, PERMISSIONS.ALL]), USERS_CONTROLLER.updateUser);
-USERS_ROUTER.delete("/delete/:id", canAny([PERMISSIONS.DELETE_ROLE, PERMISSIONS.ALL]), USERS_CONTROLLER.deleteUser);
+USERS_ROUTER.post("/create", canAny(['CreateRole', PERMISSIONS.ALL]), validate(createUserSchema), USERS_CONTROLLER.registerUser);
+USERS_ROUTER.get("/list", canAny([ 'ViewRole',PERMISSIONS.ALL]),USERS_CONTROLLER.getUsers);
+USERS_ROUTER.patch("/update/:id", canAny([ 'UpdateRole',PERMISSIONS.ALL]), USERS_CONTROLLER.updateUser);
+USERS_ROUTER.delete("/delete/:id", canAny([ 'DeleteRole',PERMISSIONS.ALL]), USERS_CONTROLLER.deleteUser);

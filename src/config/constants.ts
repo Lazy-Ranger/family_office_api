@@ -1,5 +1,3 @@
-
-
 export const PRODUCTION = 'production';
 export const LTR_OBJECT = 'object';
 
@@ -12,6 +10,7 @@ export const ERRORS_LITERAL = {
   EMP_CODE_NOT_EXISTS: 'Employee Code does not exists master list',
   ASSET_NOT_FOUND: 'Asset class not found',
   ROLE_ALREADY_EXISTS: 'Role already exists',
+  ROLE_NOT_FOUND: 'Role not found',
   SHARE_CLASS_NOT_FOUND: 'Share class Not Found',
   INVALID_SHARE_CLASS: 'Please entered correct Share class',
   DENIED_RESOURCE: 'You are not authorized to access this resource.',
@@ -36,8 +35,11 @@ export const ERRORS_LITERAL = {
 
 export const PERMISSIONS = {
   ALL: 'AllPermissions',
-  LIST_ROLE: 'ListRole',
-  CREATE_ROLE: 'CreateRole',
-  UPDATE_ROLE: 'UpdateRole',
-  DELETE_ROLE: 'DeleteRole',
+  Roles: ['CreateRole','ViewRole','UpdateRole','DeleteRole'],
+  Users: ['CreateUser','ViewUser','UpdateUser','DeleteUser'],
+  Assets: ['CreateAsset','ViewAsset','UpdateAsset','DeleteAsset'],
+  liabilities: ['CreateLiability','ViewLiability','UpdateLiability','DeleteLiability'],
+  Documents: ['CreateDocument','ViewDocument','UpdateDocument','DeleteDocument'],
+  Entity: 'CreateEntity',
+  
 } as const;
