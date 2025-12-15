@@ -1,14 +1,15 @@
 import Logs from "../../models/logs";
 
 class LoggerService {
-  async log({
+  static async log({
     userId,
     action,
     method,
     endpoint,
-    reqBody,
+    reqBody ,
     resBody,
     statusCode,
+    error,
     ip
   }: {
     userId?: number;
@@ -18,6 +19,7 @@ class LoggerService {
     reqBody?: any;
     resBody?: any;
     statusCode: number;
+    error?: string;
     ip?: string;
   }) {
 
@@ -30,6 +32,7 @@ class LoggerService {
         request_body: reqBody || null,
         response_body: resBody || null,
         status_code: statusCode,
+        error: error || null,
         ip_address: ip || null
       });
       console.log("Logging data received:", created);
@@ -41,4 +44,4 @@ class LoggerService {
   }
 }
 
-export default new LoggerService();
+export default LoggerService;

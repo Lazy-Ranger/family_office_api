@@ -37,7 +37,7 @@ class UserController {
     updateUser = async (req: Request, res: Response) => {
         try {
             const id = Number(req.params.id);
-            const updateData = req.body as Partial<any>;
+            const updateData = req.body;
             const updated = await this.userService.updateUser(id, updateData);
             httpOK(res, updated);
         } catch (err) {

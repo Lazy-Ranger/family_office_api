@@ -49,3 +49,15 @@ export interface IFamily {
   createdAt?: Date;
   updatedAt?: Date;
 }
+export interface AssetSubSubCategoryAttributes {
+  id?: number;
+  sub_category_id: number;
+  name: string;
+  code: string;
+  description?: string;
+  is_active?: boolean;
+  created_at?: Date;
+  updated_at?: Date;
+  created_by?: string;
+  updated_by?: string;
+}

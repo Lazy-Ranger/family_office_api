@@ -4,17 +4,17 @@ import CacheService from '../../../shared/services/cache/cache.service';
 import { BadRequestException } from "../../../utils/http";
 import { valueToBoolean } from '../../../utils/common';
 import { ERRORS_LITERAL } from '../../../config'
-import { IRole, IGetBody } from '../interfaces'
+import { IRole, IGetBody, IPermission } from '../interfaces'
 
 
 export interface IRoleService {
     createRole: (roleBody: IRole, userId: number) => Promise<void>;
     getPermissions: (id: number) => Promise<string[]>;
     listRoles: (body: IGetBody) => Promise<{ data: roles[], count: number }>;
-    getAllPermissions: () => Promise<permissions[]>;
-    listRolePermissions?: (roleId: number) => Promise<{ permissions: any[]; role: string }>;
+    getAllPermissions: () => Promise<IPermission[]>;
+    listRolePermissions?: (roleId: number) => Promise<{ permissions: IPermission[]; role: string }>;
     editRole: (id: number, roleBody: IRole, userId: number) => Promise<void>;
-    deleteRole: (id: number, hardDelete?: boolean) => Promise<void>;
+    deleteRole: (id: number, data?: { enable?: boolean; disable?: boolean }) => Promise<void>;
 }
 
 
@@ -49,6 +49,7 @@ class RoleService {
                 status: 1,
                 id: permissions,
             },
+            raw: true,
         });
         await this.roleHasPermissions.bulkCreate(
             existingPermissions.map((p) => ({
@@ -67,7 +68,7 @@ class RoleService {
             sizePerPage: limit,
         } = body;
         const offset = (page - 1) * limit;
-        let filter: any = {};
+        let filter: Record<string, unknown> = {};
         if (filters) {
             try {
                 filter = typeof filters === 'string' ? JSON.parse(filters) : filters;
@@ -87,8 +88,9 @@ class RoleService {
             ];
         }
 
-        if (valueToBoolean(filter.role)) {
-            const searchTxt = filter.role.toLowerCase();
+        const roleFilterValue = filter['role'];
+        if (valueToBoolean(roleFilterValue)) {
+            const searchTxt = String(roleFilterValue).toLowerCase();
             whereList.push(
                 where(fn('lower', col('roles.role')), Op.like, `%${searchTxt}%`)
             );
@@ -129,7 +131,7 @@ class RoleService {
                     },
                 ],
                 raw: true,
-            });
+            }) as unknown as Array<{ permission: string }>;
             rolePermissions =
                 permissionList?.length > 0
                     ? permissionList.map((r) => r.permission.toString())
@@ -138,21 +140,21 @@ class RoleService {
         }
         return valueToBoolean(rolePermissions) ? (rolePermissions as string[]) : [];
     }
-    getAllPermissions = async (): Promise<permissions[]> => {
+    getAllPermissions = async (): Promise<IPermission[]> => {
         const permissionList = await this.permissions.findAll({
             where: { status: 1 },
             order: [['permission', 'ASC']],
             raw: true,
-        });
+        }) as unknown as IPermission[];
         return permissionList;
     }
-    listRolePermissions = async (roleId: number): Promise<{ permissions: any[]; role: string }> => {
-        const selected = await this.roleHasPermissions.findAll({ where: { role_id: roleId }, raw: true });
-        const permIds = (selected || []).map((s: any) => s.permission_id).filter(Boolean);
+    listRolePermissions = async (roleId: number): Promise<{ permissions: IPermission[]; role: string }> => {
+        const selected = await this.roleHasPermissions.findAll({ where: { role_id: roleId }, raw: true }) as Array<{ permission_id?: number }>;
+        const permIds = (selected || []).map((s) => s.permission_id).filter(Boolean) as number[];
         if (!permIds || permIds.length === 0) return { permissions: [], role: '' };
-        const perms = await this.permissions.findAll({ where: { id: permIds, status: 1 }, raw: true });
-        const role = await this.roles.findOne({ where: { id: roleId }, raw: true });
-        const roleName = (role && (role as any).role) ? (role as any).role : '';
+        const perms = await this.permissions.findAll({ where: { id: permIds, status: 1 }, raw: true }) as unknown as IPermission[];
+        const role = await this.roles.findOne({ where: { id: roleId }, raw: true }) as { role?: string } | null;
+        const roleName = role && role.role ? role.role : '';
         console.log('Role Permissions Data:', perms, roleName);
         return {
             permissions: perms,
@@ -181,7 +183,8 @@ class RoleService {
                 status: 1,
                 id: permissions,
             },
-        });
+            raw: true,
+        }) as unknown as IPermission[];
         await this.roleHasPermissions.destroy({ where: { role_id: id } });
         await this.roleHasPermissions.bulkCreate(
             existingPermissions.map((p) => ({
@@ -191,12 +194,12 @@ class RoleService {
         );
     }
 
-    deleteRole = async (id: number, data: any) => {
+    deleteRole = async (id: number, data?: { enable?: boolean; disable?: boolean }) => {
         if (!id) {
             throw new BadRequestException('id is required');
         }
         console.log('Delete Role - Role ID:', id, "data:", data);
-        if (data.enable) {
+        if (data?.enable) {
             const updateRole1 = await this.roles.update({ status: 1 }, { where: { id } });
             console.log('Delete Role - Enable Role Result:', updateRole1, Boolean(updateRole1));
         } else {

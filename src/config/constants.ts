@@ -1,3 +1,5 @@
+import { Entity } from "src/models";
+
 export const PRODUCTION = 'production';
 export const LTR_OBJECT = 'object';
 
@@ -35,11 +37,11 @@ export const ERRORS_LITERAL = {
 
 export const PERMISSIONS = {
   ALL: 'AllPermissions',
-  Roles: ['CreateRole','ViewRole','UpdateRole','DeleteRole'],
-  Users: ['CreateUser','ViewUser','UpdateUser','DeleteUser'],
-  Assets: ['CreateAsset','ViewAsset','UpdateAsset','DeleteAsset'],
-  liabilities: ['CreateLiability','ViewLiability','UpdateLiability','DeleteLiability'],
-  Documents: ['CreateDocument','ViewDocument','UpdateDocument','DeleteDocument'],
-  Entity: 'CreateEntity',
+  Roles:"Roles",
+  Users:"Users",
+  Asset:"Asset",
+  liability:"liability",
+  Document:"Document",
+  Entity:"Entity",
   
 } as const;

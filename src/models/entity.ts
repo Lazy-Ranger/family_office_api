@@ -28,6 +28,15 @@ export default class Entity extends Model {
   address1!: string;
 
   @Column(DataType.STRING)
+  type!: string;
+
+  @Column(DataType.STRING)
+  icon!: string;
+  
+  @Column(DataType.STRING)
+  color!: string;
+
+  @Column(DataType.STRING)
   address2!: string;
 
   @Column(DataType.STRING)
@@ -41,6 +50,15 @@ export default class Entity extends Model {
 
   @Column(DataType.STRING)
   panNumber!: string;
+
+  @Column(DataType.NUMBER)
+  phone_no!: number;
+
+  @Column(DataType.NUMBER)
+  mobile_no!: number;
+
+  @Column(DataType.STRING)
+  email!: string;
 
   @Column(DataType.STRING)
   occupation!: string;

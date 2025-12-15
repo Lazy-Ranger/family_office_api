@@ -100,3 +100,28 @@ export const familySchema = Joi.object({
   createdAt: Joi.date().optional(),
   updatedAt: Joi.date().optional()
 });
+export const assetSubSubCategorySchema = Joi.object({
+  sub_category_id: Joi.number().integer().required(),
+
+  name: Joi.string()
+    .max(100)
+    .required(),
+
+  code: Joi.string()
+    .max(20)
+    .required(),
+
+  description: Joi.string()
+    .max(255)
+    .allow(null, ""),
+
+  is_active: Joi.boolean().allow(null),
+
+  created_by: Joi.string()
+    .max(50)
+    .allow(null, ""),
+
+  updated_by: Joi.string()
+    .max(50)
+    .allow(null, ""),
+});

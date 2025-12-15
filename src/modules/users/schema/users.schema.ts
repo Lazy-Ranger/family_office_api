@@ -16,7 +16,7 @@ export const createUserSchema = Joi.object({
     .required(),
 
   password: Joi.string()
-    .min(8) // enforce strong password
+    .min(8)
     .max(128)
     .required(),
 
@@ -36,4 +36,6 @@ export const createUserSchema = Joi.object({
 
   created_at: Joi.date().iso().optional(),
   updated_at: Joi.date().iso().optional(),
+  created_by: Joi.number().required(),
+  updated_by: Joi.number().required(),
 });

@@ -19,7 +19,6 @@ export interface IUsersAccountService {
 export interface IUsersAccountServiceExtended extends IUsersAccountService {
   createUser: (req: IRegisterUser) => Promise<users>;
   getUsers: () => Promise<users[]>;
-  // getUsersWithOptions?: (opts?: any) => Promise<{ rows: users[]; count: number }>;
   updateUser: (id: number, updateData: Partial<users>) => Promise<users>;
   deleteUser: (id: number, hardDelete?: boolean) => Promise<void>;
 }
@@ -80,7 +79,6 @@ class UsersAccountService {
   getUsers = async (): Promise<users[]> => {
 
     const usersList = await this.users.findAll({
-      where: { is_active: true },
       attributes: { exclude: ['password', 'login_token'] },
       order: [['id', 'ASC']],
       limit: 10,
@@ -121,17 +119,17 @@ class UsersAccountService {
     try {
       const existing = await this.users.findByPk(id);
     if (!existing) throw new NotFoundException('User not found');
-
+      console.log("data", data);
     if (data.enable) {
-      await this.users.update({ is_active: true }, { where: { id } });
+      const enable_user = await this.users.update({ is_active: true }, { where: { id } });
+      console.log('enable user', enable_user)
     } else {
-      await this.users.update({ is_active: false }, { where: { id } });
+      const disable_user = await this.users.update({ is_active: false }, { where: { id } });
+      console.log('disable user', disable_user);
     }
     } catch (error) {
       console.error('User not found', error);
     }
-
-    try { this.nodeCache.flushAll(); } catch (e) { /* noop */ }
   }
   
   // getUsersWithOptions = async (opts?: {

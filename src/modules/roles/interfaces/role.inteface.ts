@@ -12,3 +12,16 @@ export interface IGetBody {
   sortOrder: 'asc' | 'desc';
   sizePerPage: number;
 }
+
+export interface IPermission {
+  id: number;
+  permission: string;
+  description?: string;
+  status?: number;
+  created_by?: number;
+  updated_by?: number;
+  created_at?: string | Date;
+  updated_at?: string | Date;
+  [key: string]: unknown;
+}
+

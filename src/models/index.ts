@@ -9,3 +9,4 @@ export { default as permissions } from './permissions';
 export { default as role_has_permissions } from './role_has_permissions';
 export { default as roles } from './roles';
 export { default as family } from './family';
+export { default as AssetSubSubCategory } from './asset_sub_subategory';
