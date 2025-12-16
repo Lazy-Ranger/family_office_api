@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { httpException, httpOK } from "../../../utils/http";
 import { IRegisterUser } from "../interface";
 import { UsersAccountServiceInstance, IUsersAccountServiceExtended } from "../services";
+import LoggerService from "../../../shared/services/logger.service";
+import { HttpSessionRequest } from "src/interfaces";
 
 class UserController {
     private readonly userService: IUsersAccountServiceExtended;
@@ -12,6 +14,9 @@ class UserController {
 
     registerUser = async (req: Request, res: Response) => {
         const createAccountReq: IRegisterUser = req.body;
+        const sessionReq = req as HttpSessionRequest;
+        const userSession = sessionReq.user;
+        const userId = userSession?.id;
 
         try {
             const loggedInUser = await this.userService.createUser(
@@ -19,14 +24,36 @@ class UserController {
             );
 
             httpOK(res, loggedInUser);
+            const log = await LoggerService.log({
+                userId: userId,
+                action: "USER_CREATED",
+                method: "POST",
+                endpoint: "/users/create",
+                reqBody: req.body,
+                resBody: loggedInUser,
+                // ip_address: body.ip_address,
+                statusCode: 201
+            });
         } catch (err) {
             httpException(res, err, `[AuthController:] cannot create user account`);
         }
     };
 
     getUsers = async (req: Request, res: Response) => {
+        	const { page, limit, sortField, sortOrder, ...filters } = req.query;
+			const pageNum = Array.isArray(page) ? Number(page[0]) : page ? Number(page as unknown as string) : undefined;
+			const limitNum = Array.isArray(limit) ? Number(limit[0]) : limit ? Number(limit as unknown as string) : undefined;
+			const sortFieldStr = Array.isArray(sortField) ? String(sortField[0]) : sortField ? String(sortField) : undefined;
+			const sortOrderStrRaw = Array.isArray(sortOrder) ? String(sortOrder[0]) : sortOrder ? String(sortOrder) : undefined;
+			const sortOrderNormalized = sortOrderStrRaw && sortOrderStrRaw.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
         try {
-            const usersList = await this.userService.getUsers();
+            const usersList = await this.userService.getUsers({
+					page: pageNum,
+					limit: limitNum,
+					sortField: sortFieldStr,
+					sortOrder: sortOrderNormalized as 'ASC' | 'DESC',
+					filters,
+					});
             console.log('Users List:', usersList);
             httpOK(res, usersList);
         } catch (err) {

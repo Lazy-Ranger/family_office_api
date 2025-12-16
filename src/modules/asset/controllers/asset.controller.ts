@@ -9,6 +9,7 @@ class AssetController {
 			const sessionReq = req as HttpSessionRequest;
 			const userSession = sessionReq.user;
 			const userId = userSession?.id;
+			req.body = { ...(req.body || {}), created_by: userId, updated_by: userId };
 			const newAsset = await AssetService.createAsset(req.body, userId);
 			 await loggerService.log({userId,action: 'ASSET_CREATED',method: 'POST',endpoint: '/assets/add',
 					reqBody: req.body,
@@ -96,6 +97,8 @@ class AssetController {
 			const userSession = sessionReq.user;
 			const userId = userSession?.id;
 		try {
+			// set updated_by on the incoming body so update validators and logs can see it
+			req.body = { ...(req.body || {}), updated_by: userId };
 			const updatedAsset = await AssetService.updateAsset(Number(id), req.body, userId);
 				await loggerService.log({
 				  userId: userId,

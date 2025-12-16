@@ -354,3 +354,4 @@ building_plan_approval!: string | null;
   })
   updated_at!: Date;
 }
+

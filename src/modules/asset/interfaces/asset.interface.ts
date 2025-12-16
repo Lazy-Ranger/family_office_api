@@ -114,3 +114,60 @@ building_plan_approval?: string | null;
   created_at?: Date;
   updated_at?: Date;
 }
+
+export interface IVehicleAsset {
+  id?: number;
+  user_id: number;
+  assetCategoryId: number;
+  assetSubcategoryId: number;
+
+  vehicle_type: string;
+  brand: string;
+  model: string;
+  registration_number: string;
+  purchase_price: number;
+  current_value: number;
+  purchase_date: string;
+
+  insurance_expiry?: string;
+  odo_meter?: number;
+}
+
+export interface ICollectibleAsset {
+  id?: number;
+  user_id: number;
+  assetCategoryId: number;
+  assetSubcategoryId: number;
+
+  name: string;
+  collectible_type: string;
+  purchase_price: number;
+  current_value: number;
+  purchase_date: string;
+
+  condition?: string;
+  authenticity_certificate?: string;
+}
+
+export interface IEquityAsset {
+  id?: number;
+  user_id: number;
+  assetCategoryId: number;
+  assetSubcategoryId: number;
+
+  symbol: string;
+  exchange: string;
+  units: number;
+  buy_price: number;
+  current_price: number;
+  purchase_date: string;
+  broker?: string;
+}
+
+export interface IAssetMaster {
+  id?:number;
+  assetId?: number;
+  assetCategoryId: number;
+  assetSubcategoryId: number;
+  name: string;
+}

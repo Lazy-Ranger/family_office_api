@@ -100,8 +100,8 @@ export const createRLAssetSchema = Joi.object({
     .optional()
     .allow(null),
 
-  property_tax_amount: Joi.number().positive().precision(2).optional().allow(null),
-  major_repair_expenses: Joi.number().positive().precision(2).optional().allow(null),
+  property_tax_amount: Joi.number().precision(2).optional().allow(null),
+  major_repair_expenses: Joi.number().precision(2).optional().allow(null),
 
   remarks: Joi.string().optional().allow(null),
 
@@ -115,8 +115,8 @@ export const createRLAssetSchema = Joi.object({
 
   sale_value: Joi.when("status", {
     is: "Sold",
-    then: Joi.number().positive().precision(2).required(),
-    otherwise: Joi.number().positive().precision(2).optional().allow(null)
+    then: Joi.number().precision(2).required(),
+    otherwise: Joi.number().precision(2).optional().allow(null)
   }),
 
   tenant_name: Joi.string().max(255).optional().allow(null),
@@ -163,8 +163,8 @@ land_conversion_certificate: Joi.string().max(150).optional().allow(null),
 environment_clearance: Joi.string().max(150).optional().allow(null),
 building_plan_approval: Joi.string().max(150).optional().allow(null),
 
-  created_by: Joi.number().integer().required(),
-  updated_by: Joi.number().integer().required(),
+  // created_by: Joi.number().integer().required(),
+  // updated_by: Joi.number().integer().required(),
 });
 
 export const updateRLAssetSchema = Joi.object({
@@ -322,4 +322,55 @@ building_plan_approval: Joi.string().max(150).optional().allow(null),
 
   created_by: Joi.number().integer().optional(),
   updated_by: Joi.number().integer().optional(),
+});
+
+export const vehicleAssetSchema = Joi.object({
+  assetCategoryId: Joi.number().required(),
+  assetSubcategoryId: Joi.number().required(),
+
+  vehicle_type: Joi.string().max(50).required(),
+  brand: Joi.string().required(),
+  model: Joi.string().required(),
+  registration_number: Joi.string().required(),
+
+  purchase_price: Joi.number().required(),
+  current_value: Joi.number().required(),
+  purchase_date: Joi.date().required(),
+
+  insurance_expiry: Joi.date().optional(),
+  odo_meter: Joi.number().optional(),
+});
+
+export const equityAssetSchema = Joi.object({
+  assetCategoryId: Joi.number().required(),
+  assetSubcategoryId: Joi.number().required(),
+
+  symbol: Joi.string().required(),
+  exchange: Joi.string().required(),
+  units: Joi.number().required(),
+  buy_price: Joi.number().required(),
+  current_price: Joi.number().required(),
+  purchase_date: Joi.date().required(),
+  broker: Joi.string().optional(),
+});
+
+export const collectibleAssetSchema = Joi.object({
+  assetCategoryId: Joi.number().required(),
+  assetSubcategoryId: Joi.number().required(),
+
+  name: Joi.string().required(),
+  collectible_type: Joi.string().required(),
+  purchase_price: Joi.number().required(),
+  current_value: Joi.number().required(),
+  purchase_date: Joi.date().required(),
+
+  condition: Joi.string().optional(),
+  authenticity_certificate: Joi.string().optional(),
+});
+
+export const assetMasterSchema = Joi.object({
+  assetCategoryId: Joi.number().required(),
+  assetSubcategoryId: Joi.number().required(),
+  name: Joi.string().required(),
+  assetId: Joi.number().required(),
 });

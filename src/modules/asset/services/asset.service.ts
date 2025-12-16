@@ -1,8 +1,8 @@
-import realestateasset, { RealEstateAtrribute } from '../../../models/asset';
+import realestateasset, { RealEstateAtrribute } from '../../../models/realestateasset';
 import { NotFoundException, BadRequestException } from '../../../utils/http';
 import { FindOptions } from 'sequelize';
 import { IRealEstateAsset } from '../interfaces';
-import { AssetSubCategory, AssetSubSubCategory } from '../../../models';
+import { AssetSubCategory, AssetSubSubCategory, AssetMaster } from '../../../models';
 
 export interface IRealEstateAssetService {
   createAsset: (body: RealEstateAtrribute, userId?: number) => Promise<IRealEstateAsset>;
@@ -26,21 +26,33 @@ export interface IRealEstateAssetService {
 class AssetService implements IRealEstateAssetService {
   private realestateModel: typeof realestateasset;
   private SubCategoryModel = AssetSubCategory;
-  private assetTypeModel =AssetSubSubCategory;
+  private assetTypeModel = AssetSubSubCategory;
+  private assetmaster = AssetMaster;
 
   constructor() {
     this.realestateModel = realestateasset;
   }
 
+  async addToAssetMaster(assetId: number, name: string, categoryId: number, subcategoryId: number) {
+    return this.assetmaster.create({
+      assetId: assetId,
+      name: name,
+      assetCategoryId: categoryId,
+      assetSubcategoryId: subcategoryId,
+    });
+  }
+
+
   async createAsset(data: RealEstateAtrribute, userId?: number) {
-    const body = {
-      ...data,
-      created_by: userId,
-      updated_by: userId
-    }
     try {
-      const created = await this.realestateModel.create(body);
-      return created.toJSON ? (created.toJSON() as IRealEstateAsset) : (created as unknown as IRealEstateAsset);
+      const created = await this.realestateModel.create(data);
+      const master = await this.addToAssetMaster(
+        created.id as number,
+        created.property_name,
+        created.assetCategoryId,
+        created.assetSubcategoryId
+      );
+      return created.toJSON ? (created.toJSON() as IRealEstateAsset) : (created as IRealEstateAsset);
     } catch (error) {
       throw error;
     }
@@ -196,7 +208,17 @@ class AssetService implements IRealEstateAssetService {
       throw error;
     }
 }
+  // async getCategoryPage() {
+  //   try {
+  //     const assets = await this.realestateModel.findAll();
 
+
+
+
+  //   } catch (error) {
+      
+  //   }
+  // }
 
   async updateAsset(id: number, body: Partial<IRealEstateAsset>, userId?: number) {
     if (!id) {

@@ -1,5 +1,5 @@
 import {users} from '../../../models';
-import { Op } from 'sequelize';
+import {  Order } from 'sequelize';
 import {
   ConflictException,
   NotFoundException,
@@ -10,7 +10,8 @@ import { BCRYPT_CONFIG } from "../../../config";
 import {IRegisterUser} from '../interface'
 import CacheService from '../../../shared/services/cache/cache.service';
 import { valueToBoolean } from '../../../utils/common';
-import loggerService from '../../../shared/services/logger.service';
+import { FindOptions } from 'sequelize';
+
 
 export interface IUsersAccountService {
   createUser: (req: IRegisterUser) => Promise<users>;
@@ -18,7 +19,7 @@ export interface IUsersAccountService {
 
 export interface IUsersAccountServiceExtended extends IUsersAccountService {
   createUser: (req: IRegisterUser) => Promise<users>;
-  getUsers: () => Promise<users[]>;
+  getUsers: (options?: { page?: number; limit?: number; filters?: FindOptions['where']; sortField?: string; sortOrder?: 'ASC' | 'DESC' }) => Promise<{ data: users[]; total: number; page: number; limit: number; }>;
   updateUser: (id: number, updateData: Partial<users>) => Promise<users>;
   deleteUser: (id: number, hardDelete?: boolean) => Promise<void>;
 }
@@ -42,16 +43,7 @@ class UsersAccountService {
     const hashedPassword = await hash(userRegistrationData.password, BCRYPT_CONFIG.ROUNDS);
     userRegistrationData.password = hashedPassword; 
     const createUser = await this.users.create({...userRegistrationData, password: hashedPassword});
-    const log = await loggerService.log({
-            // userId: userId,
-            action: "USER_CREATED",
-            method: "POST",
-            endpoint: "/users/create",
-            reqBody: userRegistrationData,
-            resBody: createUser,
-            // ip_address: body.ip_address,
-            statusCode: 201
-        });
+
     return createUser;
   }
   async clearUserCache(id: number): Promise<void> {
@@ -76,15 +68,43 @@ class UsersAccountService {
     this.nodeCache.flushAll();
   }
 
-  getUsers = async (): Promise<users[]> => {
+async getUsers(options?: {
+  page?: number;
+  limit?: number;
+  filters?: FindOptions['where'];
+  sortField?: string;
+  sortOrder?: 'ASC' | 'DESC';
+}) {
+  try {
+    const page = options?.page ?? 1;
+    const limit = options?.limit ?? 10;
+    const offset = (page - 1) * limit;
 
-    const usersList = await this.users.findAll({
-      attributes: { exclude: ['password', 'login_token'] },
-      order: [['id', 'ASC']],
-      limit: 10,
+    const where = options?.filters ?? {};
+
+    const order: Order = options?.sortField
+      ? [[options.sortField, options.sortOrder ?? 'ASC']]
+      : [['created_at', 'DESC']];
+
+    const result = await this.users.findAndCountAll({
+      where,
+      offset,
+      order,
+      limit,
+      include: [{ all: true, nested: true }],
     });
-    return usersList;
+
+    return {
+      data: result.rows,
+      total: result.count,
+      page,
+      limit
+    };
+  } catch (error) {
+    throw error;
   }
+}
+
   updateUser = async (id: number, updateData: Partial<users>): Promise<users> => {
     if (!id || Number.isNaN(Number(id))) {
       throw new BadRequestException('Invalid id');
@@ -131,50 +151,6 @@ class UsersAccountService {
       console.error('User not found', error);
     }
   }
-  
-  // getUsersWithOptions = async (opts?: {
-  //   page?: number;
-  //   size?: number;
-  //   search?: string;
-  //   orderBy?: string;
-  //   order?: 'ASC' | 'DESC';
-  //   useCache?: boolean;
-  // }): Promise<{ rows: users[]; count: number }> => {
-  //   const page = Math.max(1, Number(opts?.page ?? 1));
-  //   const size = Math.min(1000, Math.max(1, Number(opts?.size ?? 50)));
-  //   const offset = (page - 1) * size;
-  //   const orderBy = opts?.orderBy || 'id';
-  //   const order = opts?.order || 'ASC';
-  //   const useCache = opts?.useCache ?? true;
-
-  //   const cacheKey = `users:page=${page}:size=${size}:search=${opts?.search ?? ''}:orderBy=${orderBy}:order=${order}`;
-  //   if (useCache) {
-  //     const cached = this.nodeCache.get(cacheKey) as { rows: users[]; count: number } | undefined;
-  //     if (cached) return cached;
-  //   }
-
-  //   const where: any = {};
-  //   if (opts?.search) {
-  //     const q = opts.search.trim();
-  //     where[Op.or] = [
-  //       { email: { [Op.iLike]: `%${q}%` } },
-  //       { first_name: { [Op.iLike]: `%${q}%` } },
-  //       { last_name: { [Op.iLike]: `%${q}%` } },
-  //     ];
-  //   }
-
-  //   const result = await this.users.findAndCountAll({
-  //     where,
-  //     attributes: { exclude: ['password', 'login_token'] },
-  //     order: [[orderBy, order]],
-  //     limit: size,
-  //     offset,
-  //   });
-
-  //   const payload = { rows: result.rows, count: result.count };
-  //   if (useCache) this.nodeCache.set(cacheKey, payload, 60); // cache for 60s
-  //   return payload;
-  // };
 }
 
 export const UsersAccountServiceInstance = new UsersAccountService();

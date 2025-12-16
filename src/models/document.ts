@@ -9,7 +9,7 @@ import {
 } from 'sequelize-typescript';
 import { literal } from 'sequelize';
 import users from './user';  
-import assets from './asset';
+import assets from './realestateasset';
 import AssetCategory from './assetcategory';
 import AssetSubCategory from './assetsubcategory';
 @Table({ freezeTableName: true, underscored: true, timestamps: false })
