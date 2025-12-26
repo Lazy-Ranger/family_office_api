@@ -67,7 +67,7 @@ export default class Entity extends Model {
   status!: string;
 
   @ForeignKey(() => Family)
-  @Column(DataType.INTEGER)
+  @Column({ type: DataType.INTEGER, allowNull: false })
   groupId!: number;
 
   @Column(DataType.STRING)

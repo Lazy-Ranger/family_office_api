@@ -1,6 +1,6 @@
 export interface IEntity {
-  id?: number;
-  entityName: string;
+  id: number;
+  name: string;
   type?: string;
   icon?: string;
   color?: string;

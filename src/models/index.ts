@@ -1,4 +1,4 @@
-export { default as asset } from './realestateasset';
+export { default as asset } from './assets';
 export { default as AssetCategory } from './assetcategory';
 export { default as AssetSubCategory } from './assetsubcategory';
 export { default as Entity } from './entity';
@@ -10,4 +10,4 @@ export { default as role_has_permissions } from './role_has_permissions';
 export { default as roles } from './roles';
 export { default as family } from './family';
 export { default as AssetSubSubCategory } from './asset_sub_subategory';
-export { default as AssetMaster } from './asset_master';
+export { default as formconfig } from './form_config';
