@@ -16,6 +16,19 @@ interface FormBlock {
   condition?: FieldCondition;
   form_data: Array<FormField | FormBlock>;
 }
+interface FunctionTrigger {
+  code: string;
+}
+
+interface FieldFunctionMap {
+  pre?: FunctionTrigger;
+  post?: FunctionTrigger;
+  onChange?: FunctionTrigger;
+}
+
+interface FunctionData {
+  [fieldKey: string]: FieldFunctionMap;
+}
 
 interface FormField {
   id: string;
@@ -37,7 +50,7 @@ interface SelectOptionSource {
     endpoint: string,
     label_key: string,
     value_key: string,
-    params: {}
+    params: Record<string, unknown>
 }
 interface SelectOption {
   label: string;
@@ -72,6 +85,7 @@ export interface IFormConfig {
   assetSubcategoryId: number;
   formData: FormBlock[];
   conditionData?: ConditionGroup[] | null;
+  function_data?: FunctionData | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

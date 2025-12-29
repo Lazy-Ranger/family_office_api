@@ -23,7 +23,7 @@ API_ROUTER.use("/assets", authorizedToken, ASSETS_ROUTER);
 
 API_ROUTER.use("/form", authorizedToken, FORM_ROUTER);
 
-API_ROUTER.use("/", authorizedToken, ENTITY_ROUTER);
+API_ROUTER.use("/entities", authorizedToken, ENTITY_ROUTER);
 
 // Master router (categories/subcategories)
 API_ROUTER.use('/master', authorizedToken, MASTER_ROUTER);

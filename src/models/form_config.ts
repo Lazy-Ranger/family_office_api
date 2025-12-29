@@ -14,7 +14,7 @@ import { IFormConfig } from 'src/modules/form/interfaces';
   timestamps: false
 })
 export default class formconfig extends Model<IFormConfig> {
-    @Column({
+  @Column({
     type: DataType.INTEGER,
     primaryKey: true,
     autoIncrement: true,
@@ -30,6 +30,9 @@ export default class formconfig extends Model<IFormConfig> {
   @Column({ field: 'condition_data', type: DataType.JSONB, allowNull: true })
   conditionData!: object;
 
+  @Column({ field: 'function_data', type: DataType.JSONB, allowNull: true })
+  function_data!: object;
+  
   @Column({ field: 'is_active', type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   isActive!: boolean;
 

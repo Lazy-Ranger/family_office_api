@@ -24,8 +24,8 @@ createAsset = async (req: Request, res: Response) => {
     });
 
     return res.status(201).json(result);
-  } catch (error) {
-    const err = error as any;
+  } catch (error) { 
+    const err = error as { message?: string; statusCode?: number };
     return res.status(err.statusCode || 400).json({
       message: err.message || 'Internal server error',
     });

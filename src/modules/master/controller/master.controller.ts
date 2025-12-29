@@ -16,6 +16,7 @@ class MasterController {
 			const data = await this.service.master(userId);
 			httpOK(res, data);
 		} catch (err) {
+			console.log(err);
 			httpException(res, err, `[MasterController:] cannot list the data`);
 		}
 	};
